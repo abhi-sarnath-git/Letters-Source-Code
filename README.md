@@ -10,7 +10,7 @@ Letters is the app name. **Letters' Source Code** is this public portfolio proje
 
 This is a native SwiftUI portfolio foundation, not a working private messaging service. It has Letters branding, a custom icon, chat navigation, sample conversations, search, unread/favorites/group filters, a local sample-message composer, settings, and honest roadmap screens for calls and updates. All data is fictional and held in memory. There is no account, network transport, encryption engine, server, push service, or real call functionality yet. No sample messages leave the app. Restarting resets the samples.
 
-The space-age revision adds a beige-envelope/S-seal icon, static starfield, cyan accents, six symbol-based Orbit stickers, and local PNG/JPEG sticker imports. Native sticker interactions have been syntax-checked but require a real Xcode build and device/simulator QA. Imports disappear when the app restarts. Whole sticker packs, animation, persistence and real encrypted sticker delivery are still outstanding. See `Docs/DESIGN_DIRECTION.md` and `Docs/FREE_OPTIONS.md`.
+The space-age revision adds a beige-envelope/S-seal icon, static starfield, cyan accents, six symbol-based Orbit stickers, and local PNG/JPEG sticker imports. Native sticker code has passed a hosted Xcode build; interactive sticker QA remains outstanding. Imports disappear when the app restarts. Whole sticker packs, animation, persistence and real encrypted sticker delivery are still outstanding. See `Docs/DESIGN_DIRECTION.md` and `Docs/FREE_OPTIONS.md`.
 
 The standalone LettersCore package tests a release-readiness checklist. It is not wired into the demo app and is not a security enforcement layer. Passing these checklist tests does not establish that E2EE exists or is secure.
 
@@ -26,7 +26,7 @@ This Mac was inspected on 21 October 2026: macOS 13.7.8, Swift 5.8.1 command-lin
 
 ### GitHub Actions — recommended for this public project
 
-The included `.github/workflows/ios-preview.yml` runs standalone checklist tests and builds the unsigned iPhone simulator app on a standard hosted Mac. It runs on pushes to `main`, pull requests, or manual dispatch. Standard GitHub-hosted runners are free for public repositories, subject to GitHub's usage policies. The workflow has a 20-minute timeout, cancels superseded runs, requests read-only repository access, and uploads no artifacts. No Apple signing account or cloud secrets are needed for this compilation check. The [first cloud run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39512206616) passed: checklist tests and native simulator compilation succeeded. This is compilation evidence, not an interactive UI test or proof of E2EE.
+The included `.github/workflows/ios-preview.yml` runs standalone checklist tests and builds the unsigned iPhone simulator app on a standard hosted Mac. It runs on pushes to `main`, pull requests, or manual dispatch. Standard GitHub-hosted runners are free for public repositories, subject to GitHub's usage policies. The workflow has a 20-minute timeout, cancels superseded runs, requests read-only repository access, and saves a home-screen screenshot for seven days. No Apple signing account or cloud secrets are needed. The next run also boots an available iPhone simulator, launches the offline preview and captures its screen; launch results remain pending until that run completes. The [first cloud run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39512206616) passed: checklist tests and native simulator compilation succeeded. This is compilation evidence, not an interactive UI test or proof of E2EE.
 
 An unsigned simulator build is not an installable iPhone release. This workflow does not publish an app, provide an interactive simulator, provision a messaging server, or establish working encryption.
 
@@ -42,7 +42,7 @@ Physical distribution through TestFlight requires Apple Developer Program member
 
 Integrate the Matrix Rust SDK's supported Swift bindings, pin a reviewed release, and provision an invite-only server. Require encrypted rooms and encrypted media without plaintext fallback. Implement secure session storage, device verification, recovery, account lifecycle, and revoke/ban behavior. Prove messaging between two independent devices before describing Letters as an encrypted messenger. Calls require a separate encrypted calling integration and verification.
 
-See `Docs/FEATURE_PARITY.md` and `Docs/SECURITY_ARCHITECTURE.md` for the full target and outstanding work. These requirements remain outstanding, not silently removed to fit a portfolio demo.
+Track progress in [the project checklist](Docs/CHECKLIST.md). See `Docs/FEATURE_PARITY.md` and `Docs/SECURITY_ARCHITECTURE.md` for the full target and outstanding work. These requirements remain outstanding, not silently removed to fit a portfolio demo.
 
 ## Sources
 
