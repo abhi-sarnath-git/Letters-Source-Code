@@ -2,6 +2,8 @@
 
 An original, invite-only iPhone messenger targeting WhatsApp feature parity, with a futuristic interface and end-to-end encryption as a release requirement.
 
+<img src="Letters/Assets.xcassets/AppIcon.appiconset/LettersIcon.png" alt="Letters: beige envelope with an S seal" width="128">
+
 Letters is the app name. **Letters' Source Code** is this public portfolio project's title; the public GitHub repository is [Letters-Source-Code](https://github.com/abhi-sarnath-git/Letters-Source-Code).
 
 ## What this build actually does
@@ -16,13 +18,13 @@ The standalone LettersCore package tests a release-readiness checklist. It is no
 
 Open `Letters.xcodeproj` in Xcode. Select the shared Letters scheme and an iPhone simulator, then Run. The preview targets iOS 16+. Physical-device installation needs an Apple account and a unique bundle identifier; this project deliberately has no signing team or credentials. No camera, microphone, contacts, or photo permissions are requested by the demo.
 
-This Mac was inspected on 21 October 2026: macOS 13.7.8, Swift 5.8.1 command-line tools, no full Xcode or iOS SDK. Native UI compilation and simulator QA have not been performed here. Swift syntax parsing succeeds. Running the standalone checklist tests was attempted but blocked by the command-line-tools installation lacking the SDK PlatformPath; no test pass is claimed.
+This Mac was inspected on 21 October 2026: macOS 13.7.8, Swift 5.8.1 command-line tools, no full Xcode or iOS SDK. Native compilation cannot run locally here. The first GitHub-hosted unsigned iPhone simulator build and standalone checklist tests passed on 21 October 2026 using Xcode 16.4. Simulator launch, interactive UI QA and device testing remain outstanding. Swift syntax parsing succeeds. The local checklist test attempt was blocked by the command-line-tools installation lacking the SDK PlatformPath; those tests subsequently passed on the hosted Mac.
 
 ## Older Mac / remote builds
 
 ### GitHub Actions — recommended for this public project
 
-The included `.github/workflows/ios-preview.yml` runs standalone checklist tests and builds the unsigned iPhone simulator app on a standard hosted Mac. It runs on pushes to `main`, pull requests, or manual dispatch. Standard GitHub-hosted runners are free for public repositories, subject to GitHub's usage policies. The workflow has a 20-minute timeout, cancels superseded runs, requests read-only repository access, and uploads no artifacts. No Apple signing account or cloud secrets are needed for this compilation check. It has not yet run on GitHub, so the native app's compilation remains unverified.
+The included `.github/workflows/ios-preview.yml` runs standalone checklist tests and builds the unsigned iPhone simulator app on a standard hosted Mac. It runs on pushes to `main`, pull requests, or manual dispatch. Standard GitHub-hosted runners are free for public repositories, subject to GitHub's usage policies. The workflow has a 20-minute timeout, cancels superseded runs, requests read-only repository access, and uploads no artifacts. No Apple signing account or cloud secrets are needed for this compilation check. The [first cloud run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39512206616) passed: checklist tests and native simulator compilation succeeded. This is compilation evidence, not an interactive UI test or proof of E2EE.
 
 An unsigned simulator build is not an installable iPhone release. This workflow does not publish an app, provide an interactive simulator, provision a messaging server, or establish working encryption.
 
