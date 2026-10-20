@@ -9,9 +9,7 @@ struct LettersRootView: View {
             FeaturePreviewView(title: "Updates", icon: "circle.dashed", subtitle: "Life, in little moments.",
                 features: ["Status updates and audience controls", "Private channels and broadcasts", "Communities and announcements"])
                 .tabItem { Label("Updates", systemImage: "circle.dashed") }
-            FeaturePreviewView(title: "Calls", icon: "phone", subtitle: "A familiar voice. One tap away.",
-                features: ["Encrypted voice and video calls", "Group calls and screen sharing", "Call links, scheduling, and history"])
-                .tabItem { Label("Calls", systemImage: "phone") }
+            LettersCallsView().tabItem { Label("Calls", systemImage: "phone") }
             LettersSettingsView().tabItem { Label("You", systemImage: "person.crop.circle") }
         }
         .tint(LettersTheme.accent)
@@ -123,6 +121,7 @@ struct ChatPreviewView: View {
     @State private var draft = ""
     @State private var showFeatureInfo = false
     @State private var showStickers = false
+    @State private var callDraft: CallDraft?
     private var chat: PreviewConversation? { store.conversations.first { $0.id == conversationID } }
 
     var body: some View {
@@ -181,11 +180,18 @@ struct ChatPreviewView: View {
         .navigationTitle(chat?.name ?? "Conversation").navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
-                Button { showFeatureInfo = true } label: { Image(systemName: "video") }.accessibilityLabel("Video call preview information")
-                Button { showFeatureInfo = true } label: { Image(systemName: "phone") }.accessibilityLabel("Voice call preview information")
+                if let contact = chat, !contact.group {
+                    Button { callDraft = CallDraft(contact: contact, kind: .video) } label: {
+                        Image(systemName: "video")
+                    }.accessibilityLabel("Preview video call with \(contact.name)")
+                    Button { callDraft = CallDraft(contact: contact, kind: .voice) } label: {
+                        Image(systemName: "phone")
+                    }.accessibilityLabel("Preview voice call with \(contact.name)")
+                }
             }
         }
         .onAppear { store.markRead(conversationID) }
+        .fullScreenCover(item: $callDraft) { CallPreparationView(draft: $0) }
         .sheet(isPresented: $showStickers) {
             StickerPickerView { sticker in
                 store.appendSticker(sticker, to: conversationID)
