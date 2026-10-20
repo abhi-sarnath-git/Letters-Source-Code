@@ -2,7 +2,7 @@
 
 An original, invite-only iPhone messenger targeting WhatsApp feature parity, with a futuristic interface and end-to-end encryption as a release requirement.
 
-Letters is the app name. **Letters' Source Code** is this public portfolio project's title; the intended GitHub repository slug is `Letters-Source-Code`.
+Letters is the app name. **Letters' Source Code** is this public portfolio project's title; the public GitHub repository is [Letters-Source-Code](https://github.com/abhi-sarnath-git/Letters-Source-Code).
 
 ## What this build actually does
 
@@ -32,7 +32,7 @@ Apple lists Xcode 15.2 as compatible with macOS Ventura 13.5+, so an older Xcode
 
 For current builds, `codemagic.yaml` provides an unsigned simulator-build workflow for a hosted Mac. It has not been run against a cloud account. Put this folder at the root of a repository, connect that repository to your own Codemagic account, and choose the workflow. No paid signing membership is required for this unsigned simulator build; the produced app cannot be installed on a physical iPhone. Codemagic is build automation, not a full interactive remote Xcode desktop. Simulator screenshots and automated UI tests should be added to that workflow once the first build passes. Interactive testing can use a compatible local simulator or an interactive rented Mac.
 
-Physical distribution through TestFlight requires Apple Developer Program membership, signing configuration, a device build, and Apple's applicable review. The included workflow does not do this. Nothing has been uploaded, published, or purchased.
+Physical distribution through TestFlight requires Apple Developer Program membership, signing configuration, a device build, and Apple's applicable review. The included workflow does not do this. The source is published on GitHub. No iPhone app has been distributed, hosting provisioned, or paid service purchased.
 
 ## Next engineering milestone
 
