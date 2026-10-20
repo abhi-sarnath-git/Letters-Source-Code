@@ -1,0 +1,24 @@
+workflows:
+  letters-portfolio:
+    name: Letters portfolio simulator build
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      xcode: latest
+    scripts:
+      - name: Test release-readiness checklist
+        script: cd LettersCore && swift test
+      - name: Build native preview without signing
+        script: >-
+          xcodebuild -project Letters.xcodeproj -scheme Letters
+          -configuration Debug -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+      - name: Package simulator preview
+        script: >-
+          ditto -c -k --sequesterRsrc --keepParent
+          build/Build/Products/Debug-iphonesimulator/Letters.app
+          build/Letters-Simulator.zip
+    artifacts:
+      - build/Letters-Simulator.zip
+      - /tmp/xcodebuild_logs/*.log
