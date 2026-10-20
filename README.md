@@ -14,6 +14,8 @@ The space-age revision adds a beige-envelope/S-seal icon, static starfield, cyan
 
 The standalone LettersCore package tests a release-readiness checklist. It is not wired into the demo app and is not a security enforcement layer. Passing these checklist tests does not establish that E2EE exists or is secure.
 
+The calling revision adds searchable sample contacts, voice/video buttons in direct chats, and an offline call-preparation screen. It does not dial, ring, capture media, or show a fake connection. A server account and a verified MatrixRTC integration are still required for live encrypted calls. See [Calling setup and acceptance criteria](Docs/CALLING.md).
+
 ## Open and build
 
 Open `Letters.xcodeproj` in Xcode. Select the shared Letters scheme and an iPhone simulator, then Run. The preview targets iOS 16+. Physical-device installation needs an Apple account and a unique bundle identifier; this project deliberately has no signing team or credentials. No camera, microphone, contacts, or photo permissions are requested by the demo.
