@@ -1,0 +1,39 @@
+name: Letters iPhone preview
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: letters-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Check and build Letters
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Show selected Xcode
+        run: xcodebuild -version
+      - name: Test release-readiness bookkeeping
+        working-directory: LettersCore
+        run: swift test
+      - name: Build unsigned iPhone simulator preview
+        run: >-
+          xcodebuild -project Letters.xcodeproj -scheme Letters
+          -configuration Debug -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+
+      # Intentionally no signing secrets, physical-device distribution, or uploaded
+      # build artifacts. This workflow verifies compilation; it does not prove E2EE.
