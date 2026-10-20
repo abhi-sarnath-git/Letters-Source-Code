@@ -25,7 +25,7 @@ Baseline: WhatsApp consumer iPhone experience, reviewed 21 October 2026. All fea
 | Communities | Topic groups, announcements, replies, admin management | Planned |
 | Broadcasts and channels | Broadcast lists, channel posts, following, reactions and audience controls inside the invite-only network | Planned |
 | Status | Text/photo/video/voice updates, expiry, views, replies, mentions, resharing and audience controls | Planned; roadmap screen only |
-| Calling | Encrypted voice/video, one-to-one and groups, incoming/background calls, missed calls, mute, speaker, camera switching | Planned; separate calling infrastructure required |
+| Calling | Encrypted voice/video, one-to-one and groups, incoming/background calls, missed calls, mute, speaker, camera switching | One-to-one voice/video entry points and offline preparation screens in preview; real calls, group calling and infrastructure remain planned. See CALLING.md |
 | Advanced calling | Call links, scheduling, screen sharing, picture-in-picture, video effects/backgrounds | Planned |
 | Security | E2EE, device verification, key change warnings, secure local storage, encrypted media and key recovery | Planned; mandatory before real messaging |
 | Privacy | Disappearing messages, view-once media, locked chats/app, blocked users, granular audience/presence/read controls | Planned |
