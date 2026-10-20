@@ -8,6 +8,8 @@ One-to-one in-app voice and video calls between private, invited contacts, with 
 
 The Calls tab lists fictional direct contacts with voice/video entry points and search. The same actions are available in direct sample chats. They open an accessible full-screen preparation interface, allow selection between voice and video, and explain the outstanding setup. Group chat buttons are not presented as one-to-one calling. No fake call history, ringing, connection timer, delivery, media capture or encryption success is generated.
 
+The [calling revision cloud build](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39513047308) passed on 21 October 2026: unsigned iPhone simulator compilation and the existing bookkeeping tests succeeded. This is not an interactive call test.
+
 These are offline UI flows, not functional calls. They deliberately request no microphone/camera permissions and do not open a public calling website as a shortcut. Account membership and cryptographic trust cannot be inferred from the sample conversation list.
 
 ## Live implementation path
