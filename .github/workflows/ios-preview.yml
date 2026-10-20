@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Show selected Xcode
@@ -35,5 +35,15 @@ jobs:
           -destination 'generic/platform=iOS Simulator'
           -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
 
-      # Intentionally no signing secrets, physical-device distribution, or uploaded
-      # build artifacts. This workflow verifies compilation; it does not prove E2EE.
+      - name: Launch preview and capture iPhone screenshot
+        run: bash scripts/capture-preview.sh
+      - name: Save portfolio screenshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: letters-iphone-preview
+          path: ${{ runner.temp }}/letters-preview/letters-home.png
+          if-no-files-found: error
+          retention-days: 7
+
+      # No signing secrets or physical-device distribution. Launching the offline
+      # preview is a smoke check, not interactive UI QA or evidence of E2EE.
