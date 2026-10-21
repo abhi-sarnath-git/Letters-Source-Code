@@ -29,7 +29,9 @@ Updated 21 October 2026. Checked items describe completed work, not security cer
 - [x] Server invitation/security-boundary tests passed locally.
 - [x] Letterbox cloud build passed 10 Swift tests, 10 server tests, native compilation, launch and screenshot QR decoding (run 39549406715).
 - [x] Every approved member can issue invitations; tests verify independent contact lists and personal group administration.
-- [ ] Visually inspect the Letterbox screenshot.
+- [x] Visually inspect the Letterbox screenshot and verify the original artifact checksum.
+- [x] Prepare public portfolio gallery at `Letters/Prototype Screenshots` with original native captures and honest captions.
+- [ ] Continue adding verified screenshots with completed feature milestones.
 - [ ] Deploy reviewed HTTPS service with production authentication and abuse controls.
 - [ ] Connect native invitations to live membership and verified encrypted direct/group rooms.
 - [ ] Cross-device scanning, malicious input, camera-denial, VoiceOver and cancellation QA.
@@ -60,3 +62,7 @@ No paid upgrade, scheduled retry, running server or working messaging service is
 - [ ] Complete remaining feature families in FEATURE_PARITY.md and perform security review.
 
 The current app is an offline portfolio preview. End-to-end encryption and live calls remain release requirements and are not implemented.
+
+## Current owner preference
+
+Finish app functionality before discussing deployment. Continue with the encrypted messaging integration milestone; do not treat gallery screenshots or passing local prototype tests as completion of the app. No deployment, purchase or signing enrollment is part of the screenshot update.

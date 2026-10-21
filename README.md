@@ -6,6 +6,10 @@ An original, invite-only iPhone messenger targeting the agreed WhatsApp-style fe
 
 Letters is the app name. **Letters' Source Code** is this public portfolio project's title; the public GitHub repository is [Letters-Source-Code](https://github.com/abhi-sarnath-git/Letters-Source-Code).
 
+## Portfolio screenshots
+
+[View Prototype Screenshots](Letters/Prototype%20Screenshots/README.md) for verified native captures of Chats, Alert All and Letterbox QR, including implementation status and build evidence. Screenshots will accompany completed feature milestones; previews are labelled accurately.
+
 ## What this build actually does
 
 This is a native SwiftUI portfolio foundation, not a working private messaging service. It has Letters branding, a custom icon, chat navigation, sample conversations, search, unread/favorites/group filters, a local sample-message composer, settings, and honest roadmap screens for voice calls and updates. All data is fictional and held in memory. There is no account, network transport, encryption engine, server, push service, or real call functionality yet. No sample messages leave the app. Restarting resets the samples.
