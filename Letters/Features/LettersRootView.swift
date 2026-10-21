@@ -6,7 +6,7 @@ struct LettersRootView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            ConversationListView().tabItem { Label("Chats", systemImage: "bubble.left.and.bubble.right") }.tag(0)
+            ConversationListView(selectedTab: $selectedTab).tabItem { Label("Chats", systemImage: "bubble.left.and.bubble.right") }.tag(0)
             FeaturePreviewView(title: "Updates", icon: "circle.dashed", subtitle: "Life, in little moments.",
                 features: ["Status updates and audience controls", "Private channels and broadcasts", "Communities and announcements"])
                 .tabItem { Label("Updates", systemImage: "circle.dashed") }.tag(1)
@@ -20,6 +20,9 @@ struct LettersRootView: View {
 }
 
 struct ConversationListView: View {
+    @Binding var selectedTab: Int
+    @State private var newsCategory = WorldNewsCategory.world
+    @State private var runnerPaused = false
     @EnvironmentObject private var store: PreviewStore
     @State private var search = ""
     @State private var filter = "All"
@@ -40,11 +43,35 @@ struct ConversationListView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 HStack {
-                    WorldPulseView()
+                    WorldPulseView(category: $newsCategory, paused: $runnerPaused)
                     Spacer()
-                    Button { showInviteInfo = true } label: {
-                        Image(systemName: "envelope.open").font(.title3).frame(width: 44, height: 44)
-                    }.accessibilityLabel("Open Letterbox invitations")
+                    Menu {
+                        Section("Around the world") {
+                            Picker("News category", selection: $newsCategory) {
+                                ForEach(WorldNewsCategory.allCases) { category in
+                                    Text(category.rawValue).tag(category)
+                                }
+                            }
+                            Button { runnerPaused.toggle() } label: {
+                                Label(runnerPaused ? "Resume news and atom" : "Pause news and atom", systemImage: runnerPaused ? "play.fill" : "pause.fill")
+                            }
+                        }
+                        Section("Conversations") {
+                            Picker("Conversation filter", selection: $filter) {
+                                ForEach(filters, id: \.self) { item in Text(item).tag(item) }
+                            }
+                            Button { showInviteInfo = true } label: { Label("Letterbox invitations & groups", systemImage: "envelope.open") }
+                        }
+                        Section("Letters") {
+                            Button { selectedTab = 2 } label: { Label("Voice calls", systemImage: "phone") }
+                            Button { selectedTab = 3 } label: { Label("Alert All", systemImage: "exclamationmark.triangle") }
+                            Button { selectedTab = 1 } label: { Label("Updates", systemImage: "circle.dashed") }
+                            Button { selectedTab = 4 } label: { Label("Your profile & settings", systemImage: "person.crop.circle") }
+                        }
+                    } label: {
+                        Image(systemName: "line.3.horizontal.circle").font(.title2).frame(width: 44, height: 44)
+                    }.accessibilityLabel("Home menu: news, chats and Letters features")
+
                 }.padding(.horizontal, 20).padding(.vertical, 14)
 
                 HStack(spacing: 10) {

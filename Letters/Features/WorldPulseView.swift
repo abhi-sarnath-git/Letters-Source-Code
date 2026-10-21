@@ -29,8 +29,8 @@ struct WorldPulseView: View {
     @StateObject private var pulse = WorldPulseStore()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
-    @State private var category = WorldNewsCategory.world
-    @State private var paused = false
+    @Binding var category: WorldNewsCategory
+    @Binding var paused: Bool
     @State private var visible = false
     @State private var index = 0
     @State private var showHeadline = false
@@ -48,16 +48,9 @@ struct WorldPulseView: View {
             HStack(alignment: .center, spacing: 10) {
                 VStack(alignment: .leading, spacing: 7) {
                     Text("Live Around The World").font(.headline).fixedSize(horizontal: false, vertical: true)
-                    Menu {
-                        Picker("Headline category", selection: $category) {
-                            ForEach(WorldNewsCategory.allCases) { item in Text(item.rawValue).tag(item) }
-                        }
-                    } label: {
-                        HStack(spacing: 6) {
-                            Text(category.rawValue).font(.subheadline.weight(.medium))
-                            Image(systemName: "chevron.down").font(.caption.weight(.semibold))
-                        }.foregroundStyle(LettersTheme.accent).frame(minHeight: 44, alignment: .leading)
-                    }.accessibilityLabel("Headline category: \(category.rawValue)")
+                    Text(category.rawValue).font(.subheadline.weight(.medium))
+                        .foregroundStyle(LettersTheme.accent)
+                    Text("Choose topics in the Home menu").font(.caption2).foregroundStyle(LettersTheme.secondary)
                 }
                 Spacer(minLength: 0)
                 OrbitalEarth(active: active && !paused).frame(width: 66, height: 66)
@@ -99,8 +92,8 @@ struct WorldPulseView: View {
                 do { try await Task.sleep(nanoseconds: 300_000_000_000) } catch { return }
             }
         }
-        .task(id: "\(active)-\(paused)-\(reduceMotion)-\(category.rawValue)") {
-            guard active, !paused, !reduceMotion else { return }
+        .task(id: "\(active)-\(paused)-\(reduceMotion)-\(category.rawValue)-\(showHeadline)") {
+            guard active, !paused, !reduceMotion, !showHeadline else { return }
             while !Task.isCancelled {
                 do { try await Task.sleep(nanoseconds: 9_000_000_000) } catch { return }
                 if items.count > 1 { index = (index + 1) % items.count }

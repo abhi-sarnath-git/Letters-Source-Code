@@ -5,7 +5,8 @@ Owner-approved scope: replace the Home app-name heading with a small Earth/atom 
 ## Implemented
 
 - Native SwiftUI Earth/atom with three orbital paths and moving electrons. Movement pauses offscreen/inactive and for Reduce Motion; a user pause control stops both atom and headline rotation.
-- A category menu and rotating headlines, with a full-headline sheet and a link to the publisher.
+- A consolidated Home drop-down menu for news categories, pause/resume, conversation filters, Letterbox invitations/groups, voice calls, Alert All, Updates and profile/settings. Existing chat filters remain available as shortcuts.
+- Rotating headlines, with a full-headline sheet and a link to the publisher.
 - Public HTTPS RSS from The Guardian: `/world/rss`, `/business/stock-markets/rss`, `/business/oil/rss`, `/technology/cryptocurrencies/rss`. Source attribution remains visible. No API key, subscriber credential, price data or scraping bypass is used.
 - Fetch on visible Home and category changes; at most once per category per five minutes, with periodic refresh while Home is foregrounded. This is regularly refreshed news, not instantaneous breaking-news delivery or financial quotes. iOS background execution is not kept running.
 - Failed refreshes preserve per-category in-memory results and visibly mark them cached. No response shows unavailable rather than invented news. Fetch time and source publication time are different and are labelled separately.
