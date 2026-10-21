@@ -30,6 +30,7 @@ struct ConversationListView: View {
     @State private var search = ""
     @State private var filter = "All"
     @State private var showInviteInfo = ProcessInfo.processInfo.arguments.contains("--preview-letterbox")
+    @State private var showMarkets = ProcessInfo.processInfo.arguments.contains("--preview-markets")
     private let filters = ["All", "Unread", "Favorites", "Groups"]
 
     private var visibleConversations: [PreviewConversation] {
@@ -67,6 +68,11 @@ struct ConversationListView: View {
                                 Label(runnerPaused ? "Resume news and atom" : "Pause news and atom", systemImage: runnerPaused ? "play.fill" : "pause.fill")
                             }
                         }
+                        Section("Markets") {
+                            Button { DispatchQueue.main.async { showMarkets = true } } label: {
+                                Label("Markets · Stocks, Oil & Bitcoin", systemImage: "chart.line.uptrend.xyaxis")
+                            }
+                        }
                         Section("Connect") {
                             Button { navigate(to: 2) } label: { Label("Voice calls", systemImage: "phone") }
                             Button { navigate(to: 1) } label: { Label("Updates", systemImage: "circle.dashed") }
@@ -79,7 +85,7 @@ struct ConversationListView: View {
                         }
                     } label: {
                         Image(systemName: "line.3.horizontal.circle").font(.title2).frame(width: 44, height: 44)
-                    }.accessibilityLabel("Home menu: chats, news, connect, safety and you")
+                    }.accessibilityLabel("Home menu: chats, news, markets, connect, safety and you")
 
                 }.padding(.horizontal, 20).padding(.vertical, 14)
 
@@ -142,6 +148,8 @@ struct ConversationListView: View {
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: filter)
             .background(OrbitBackdrop()).toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { ChatPreviewView(conversationID: $0) }
+            // Markets is reached from the Home menu only; the bottom tabs stay unchanged.
+            .navigationDestination(isPresented: $showMarkets) { MarketsView() }
             .sheet(isPresented: $showInviteInfo) {
                 LetterboxView(screenshotMode: ProcessInfo.processInfo.arguments.contains("--preview-letterbox"))
             }

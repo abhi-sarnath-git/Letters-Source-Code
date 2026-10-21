@@ -35,3 +35,10 @@ sleep 3
 xcrun simctl spawn "$preview_device" launchctl list | grep com.example.letters
 xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-letterbox.png"
 swift scripts/verify-letterbox-qr.swift "$RUNNER_TEMP/letters-preview/letters-letterbox.png"
+
+# The new Markets capture uses labelled fictional values, never archived live quotes.
+xcrun simctl terminate "$preview_device" com.example.letters
+xcrun simctl launch "$preview_device" com.example.letters --preview-markets --preview-world-pulse
+sleep 4
+xcrun simctl spawn "$preview_device" launchctl list | grep com.example.letters
+xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-markets.png"
