@@ -17,6 +17,8 @@ Updated 21 October 2026. Checked items describe completed work, not security cer
 - [x] Replace video calling with Alert All per owner request; retain voice calling.
 - [ ] Interactive accessibility, navigation, sticker import and small-screen QA.
 - [ ] Physical iPhone signing and distribution.
+- [x] Add download/install guide distinguishing source, simulator and signed iPhone builds.
+- [ ] Verify downloadable simulator ZIP and checksum in the hosted workflow.
 
 ## Letterbox invitations
 
@@ -25,7 +27,9 @@ Updated 21 October 2026. Checked items describe completed work, not security cer
 - [x] Separate member/contact admission and existing-member group invitations; empty new sample chats.
 - [x] Local-only admission service with persistent, atomic one-use redemption, session checks, private contacts and group authorization.
 - [x] Server invitation/security-boundary tests passed locally.
-- [ ] Verify this revision's hosted Swift tests, native build and Letterbox screenshot.
+- [x] Letterbox cloud build passed 10 Swift tests, 10 server tests, native compilation, launch and screenshot QR decoding (run 39549406715).
+- [x] Every approved member can issue invitations; tests verify independent contact lists and personal group administration.
+- [ ] Visually inspect the Letterbox screenshot.
 - [ ] Deploy reviewed HTTPS service with production authentication and abuse controls.
 - [ ] Connect native invitations to live membership and verified encrypted direct/group rooms.
 - [ ] Cross-device scanning, malicious input, camera-denial, VoiceOver and cancellation QA.

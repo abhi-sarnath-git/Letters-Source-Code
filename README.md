@@ -26,6 +26,12 @@ The envelope button on Chats now opens Letterbox. Every member can create their 
 
 A separate loopback-only Python admission service implements persistent, server-enforced invitation and membership rules, with tests for concurrent redemption, revocation and private contact/group access. It is not deployed or connected to the native preview and has no encrypted message transport. See [Letterbox implementation and integration limits](Docs/LETTERBOX.md). Real accounts, private cross-device chats and E2EE remain outstanding.
 
+## Download Letters
+
+**No iPhone download or TestFlight invitation is available yet.** [Download/install guide](Docs/DOWNLOADS.md) explains the free source/simulator route, personal iPhone testing with Xcode, and future family/friend installation through TestFlight.
+
+The workflow now packages an unsigned **Simulator-only** app as the `letters-simulator-download` artifact, retained seven days. Use a successful run containing the packaging step. It needs a compatible Mac with full Xcode/Simulator and cannot install on an iPhone. The package includes build information and a checksum. It contains the same offline portfolio preview, not an encrypted messenger.
+
 ## Open and build
 
 Open `Letters.xcodeproj` in Xcode. Select the shared Letters scheme and an iPhone simulator, then Run. The preview targets iOS 16+. Physical-device installation needs an Apple account and a unique bundle identifier; this project deliberately has no signing team or credentials. Camera permission is requested only when you choose the Letterbox QR scanner. QR image import uses a file picker; no microphone, contacts or full photo-library permission is requested.
@@ -36,7 +42,7 @@ This Mac was inspected on 21 October 2026: macOS 13.7.8, Swift 5.8.1 command-lin
 
 ### GitHub Actions — recommended for this public project
 
-The included `.github/workflows/ios-preview.yml` runs standalone checklist tests and builds the unsigned iPhone simulator app on a standard hosted Mac. It runs on pushes to `main`, pull requests, or manual dispatch. Standard GitHub-hosted runners are free for public repositories, subject to GitHub's usage policies. The workflow has a 20-minute timeout, cancels superseded runs, requests read-only repository access, and saves preview screenshots for seven days. No Apple signing account or cloud secrets are needed. The workflow also boots an available iPhone simulator, launches the offline preview and captures its home and Alert All screens. The [Alert All revision](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39547086390) passed: package tests, native compilation, both simulator launches and both screenshot captures. Both screenshots were visually inspected; interactive UI and accessibility testing remain outstanding. The [first cloud run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39512206616) passed: checklist tests and native simulator compilation succeeded. This is compilation evidence, not an interactive UI test or proof of E2EE.
+The included `.github/workflows/ios-preview.yml` runs standalone checklist tests and builds the unsigned iPhone simulator app on a standard hosted Mac. It runs on pushes to `main`, pull requests, or manual dispatch. Standard GitHub-hosted runners are free for public repositories, subject to GitHub's usage policies. The workflow has a 20-minute timeout, cancels superseded runs, requests read-only repository access, and saves preview screenshots for seven days. No Apple signing account or cloud secrets are needed. The workflow also boots an available iPhone simulator, launches the offline preview and captures its home, Alert All and Letterbox screens. The [Alert All revision](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39547086390) passed: package tests, native compilation, both simulator launches and both screenshot captures. Both screenshots were visually inspected; interactive UI and accessibility testing remain outstanding. The [first cloud run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39512206616) passed: checklist tests and native simulator compilation succeeded. This is compilation evidence, not an interactive UI test or proof of E2EE.
 
 An unsigned simulator build is not an installable iPhone release. This workflow does not publish an app, provide an interactive simulator, provision a messaging server, or establish working encryption.
 
@@ -47,6 +53,8 @@ Apple lists Xcode 15.2 as compatible with macOS Ventura 13.5+, so an older Xcode
 For current builds, `codemagic.yaml` provides an unsigned simulator-build workflow for a hosted Mac. It has not been run against a cloud account. Put this folder at the root of a repository, connect that repository to your own Codemagic account, and choose the workflow. No paid signing membership is required for this unsigned simulator build; the produced app cannot be installed on a physical iPhone. Codemagic is build automation, not a full interactive remote Xcode desktop. Simulator screenshots and automated UI tests should be added to that workflow once the first build passes. Interactive testing can use a compatible local simulator or an interactive rented Mac.
 
 Physical distribution through TestFlight requires Apple Developer Program membership, signing configuration, a device build, and Apple's applicable review. The included workflow does not do this. The source is published on GitHub. No iPhone app has been distributed, hosting provisioned, or paid service purchased.
+
+The [per-member Letterbox build](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39549406715) passed 10 Swift tests, 10 server tests, native compilation, simulator launches and decoding the Letterbox QR from its screenshot. Physical-camera, interactive flow and accessibility QA remain outstanding.
 
 ## Next engineering milestone
 
