@@ -2,7 +2,7 @@
 
 Original screenshots of Letters running in an iPhone 16 Pro simulator, captured on 21 October 2026 with Xcode 16.4 / iOS 18.5. These are actual native SwiftUI screens, not design mockups. All conversations and profiles are fictional.
 
-**Current stage: offline portfolio prototype.** These screenshots demonstrate completed local interfaces and behavior, not working encrypted communication. E2EE, live messages, voice calls, emergency notifications and cross-device invitation redemption remain unimplemented.
+**Current stage: portfolio prototype with live public news; messaging remains local.** These screenshots demonstrate completed local interfaces and behavior, not working encrypted communication. E2EE, live messages, voice calls, emergency notifications and cross-device invitation redemption remain unimplemented. Home now fetches public news separately; the new Home screenshot deliberately uses an identified sample headline.
 
 ## Chats — local interface
 
@@ -21,6 +21,16 @@ Emergency-alert preparation for all approved Letters members, optional note, exp
 A member's one-use invitation QR and matching manual code. Every sample member can generate their own invitations and have a different contact list. Groups require separate admission. Preview codes are session-local and grant no online access; the QR shown here is harmless fictional test data.
 
 <img src="03-letterbox-qr-preview.png" alt="Letterbox QR preview with matching demo invitation code and explicit local-only notice" width="320">
+
+## Orbital Home — news runner and task-based menu
+
+An Earth/atom replaces the Home name heading, with orbiting electrons at runtime. “Live Around The World” offers World, Global Stocks, Oil and Crypto headline categories through the Home menu. Actions are grouped as Chats & People, Around the World, Connect, Safety and You; chat filters and tabs stay available as shortcuts. Headline/filter changes use short fades and respect Reduce Motion. An open article keeps its original headline and link while feeds refresh.
+
+<img src="04-orbital-home-news-preview.png" alt="Letters Home with orbital Earth, sample news runner and Home menu button" width="320">
+
+The image uses a **fictional, labelled sample headline**, not an actual news event or a quote from The Guardian. Normal mode reads public Guardian RSS, with source attribution, five-minute foreground refresh and honest offline/cache states. This screenshot shows the menu button, not the open menu; a still image cannot demonstrate orbital motion or transitions. Physical-device usability and accessibility QA remain outstanding.
+
+Capture source: `28731c4bba2aede95609ea84e528bd337a566a28`, [Home refinement run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39556128782). The original three screenshots below retain their earlier source provenance.
 
 ## Verification and provenance
 
