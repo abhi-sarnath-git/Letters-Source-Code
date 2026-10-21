@@ -17,7 +17,7 @@ xcrun simctl bootstatus "$preview_device" -b
 xcrun simctl ui "$preview_device" appearance dark
 xcrun simctl status_bar "$preview_device" override --time '9:41' --batteryState charged --batteryLevel 100
 xcrun simctl install "$preview_device" build/Build/Products/Debug-iphonesimulator/Letters.app
-xcrun simctl launch "$preview_device" com.example.letters
+xcrun simctl launch "$preview_device" com.example.letters --preview-world-pulse
 sleep 4
 xcrun simctl spawn "$preview_device" launchctl list | grep com.example.letters
 mkdir -p "$RUNNER_TEMP/letters-preview"

@@ -66,3 +66,13 @@ The current app is an offline portfolio preview. End-to-end encryption and live 
 ## Current owner preference
 
 Finish app functionality before discussing deployment. Continue with the encrypted messaging integration milestone; do not treat gallery screenshots or passing local prototype tests as completion of the app. No deployment, purchase or signing enrollment is part of the screenshot update.
+
+## Orbital Home / world headlines
+
+- [x] Implement animated Earth/atom in place of the Home text heading, retaining the original app icon.
+- [x] Implement category runner for global stocks, oil, crypto and world headlines.
+- [x] Add attributed RSS client, bounded parser, category caches and honest offline/age states.
+- [x] Add pause, Reduce Motion and foreground-only lifecycle handling.
+- [ ] Verify hosted parser/live-feed tests and native compilation.
+- [ ] Inspect and publish the labelled-sample Home screenshot to Prototype Screenshots.
+- [ ] Interactive device/accessibility/offline lifecycle QA.

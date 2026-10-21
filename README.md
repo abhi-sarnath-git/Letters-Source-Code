@@ -30,6 +30,10 @@ The envelope button on Chats now opens Letterbox. Every member can create their 
 
 A separate loopback-only Python admission service implements persistent, server-enforced invitation and membership rules, with tests for concurrent redemption, revocation and private contact/group access. It is not deployed or connected to the native preview and has no encrypted message transport. See [Letterbox implementation and integration limits](Docs/LETTERBOX.md). Real accounts, private cross-device chats and E2EE remain outstanding.
 
+## Home news and orbital Earth
+
+Home now replaces the Letters word heading with an animated Earth/atom, alongside “Live Around The World.” Its menu selects World News, Global Stocks, Oil or Crypto headlines from The Guardian. Normal mode refreshes while Home is visible; screenshot mode uses a labelled sample. Source timestamps, unavailable/cached states, a pause control and Reduce Motion handling are included. This is news, not market quotes. See [implementation and verification limits](Docs/WORLD_PULSE.md).
+
 ## Download Letters
 
 **No iPhone download or TestFlight invitation is available yet.** [Download/install guide](Docs/DOWNLOADS.md) explains the free source/simulator route, personal iPhone testing with Xcode, and future family/friend installation through TestFlight.

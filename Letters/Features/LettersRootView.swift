@@ -40,16 +40,12 @@ struct ConversationListView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 HStack {
-                    Lettermark()
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Letters").font(.largeTitle.weight(.semibold))
-                        Text("Your people. Your space.").font(.subheadline).foregroundStyle(LettersTheme.secondary)
-                    }
+                    WorldPulseView()
                     Spacer()
                     Button { showInviteInfo = true } label: {
                         Image(systemName: "envelope.open").font(.title3).frame(width: 44, height: 44)
                     }.accessibilityLabel("Open Letterbox invitations")
-                }.padding(.horizontal, 20).padding(.vertical, 18)
+                }.padding(.horizontal, 20).padding(.vertical, 14)
 
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass").foregroundStyle(LettersTheme.secondary)

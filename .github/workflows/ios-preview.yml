@@ -30,6 +30,11 @@ jobs:
       - name: Test invitations, alert lifecycle and release-readiness bookkeeping
         working-directory: LettersCore
         run: swift test
+      - name: Verify public news feed connectivity and parsing
+        working-directory: LettersCore
+        env:
+          LETTERS_CHECK_PUBLIC_FEEDS: "1"
+        run: swift test --filter WorldNewsTests.testLiveFeedsWhenExplicitlyEnabled
       - name: Build unsigned iPhone simulator preview
         run: >-
           xcodebuild -project Letters.xcodeproj -scheme Letters
