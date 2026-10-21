@@ -18,7 +18,7 @@ Checked against provider documentation on 21 October 2026. No accounts created, 
 
 Keep the portfolio phase at $0: use local previews and a free Mac cloud build allowance. Choose public-source GitHub Actions only if the owner wants the source public; otherwise begin with Codemagic's personal allowance. Neither requires buying a new Mac for cloud compilation. A cloud simulator build cannot be installed directly on an iPhone. Real family deployment comes after encryption and membership verification, with Apple distribution and dependable hosting budgeted separately.
 
-Oracle is a plausible free server experiment, not a promise of uninterrupted family service. A free build host is not a messaging host. Full feature parity, especially video calls, large media and storage, cannot be guaranteed to stay within free allowances indefinitely.
+Oracle is a plausible free server experiment, not a promise of uninterrupted family service. A free build host is not a messaging host. Full feature parity, including voice relay, large media, notifications and storage, cannot be guaranteed to stay within free allowances indefinitely.
 
 ## Sources
 
@@ -30,3 +30,7 @@ Oracle is a plausible free server experiment, not a promise of uninterrupted fam
 - https://developer.apple.com/help/account/membership/program-enrollment/
 - https://developer.apple.com/help/account/membership/fee-waivers/
 - https://github.com/matrix-org/matrix-rust-sdk
+
+## Alert All scope update
+
+Video calling has been replaced by Alert All for all approved members. The local rehearsal adds no hosting expense. Real encrypted fan-out and push delivery still need server capacity and Apple provisioning; saving an Oracle stack is not a running service. Critical Alerts entitlement is not assumed, and no notification delivery guarantee is made. See ALERT_ALL.md.

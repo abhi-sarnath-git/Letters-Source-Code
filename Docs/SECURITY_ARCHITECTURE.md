@@ -20,7 +20,11 @@ Back up room keys only through the SDK-supported encrypted recovery mechanisms. 
 
 ## Calls
 
-Choose a supported encrypted calling stack compatible with the selected Matrix deployment. Verify end-to-end media encryption across one-to-one, group, screen-share, reconnect and TURN/SFU paths. Transport encryption to a relay is insufficient. Integrate CallKit, audio sessions and supported Apple background/VoIP push behavior. No calling stack is integrated yet.
+Choose a supported encrypted calling stack compatible with the selected Matrix deployment. Verify end-to-end media encryption across one-to-one voice, group voice, reconnect and TURN/SFU paths. Transport encryption to a relay is insufficient. Integrate CallKit, audio sessions and supported Apple background/VoIP push behavior. No calling stack is integrated yet.
+
+## Alert All
+
+Alert All replaces video calling by owner request. Emergency details, acknowledgements and resolution updates must be encrypted for all approved members, with server-enforced membership, replay protection and truthful delivery state. Do not put emergency text or keys in APNs payloads. Never equate notification acceptance with a human response. See ALERT_ALL.md for acceptance criteria and platform limits. No live alert transport exists yet.
 
 ## Required integration evidence before a family pilot
 
@@ -33,4 +37,4 @@ Choose a supported encrypted calling stack compatible with the selected Matrix d
 7. Offline queues, duplicates, failed uploads and retries preserve encryption and correct user-visible status.
 8. Calling and other feature families receive their own cryptographic and platform validation before being enabled.
 
-The current portfolio preview has no networking and no cryptographic dependency. It cannot be used to send encrypted messages. Its checklist unit tests only exercise release bookkeeping; they are not the evidence above or a security audit.
+The current portfolio preview has no networking and no cryptographic dependency. It cannot be used to send encrypted messages. Its unit tests exercise release bookkeeping and local alert rehearsal state; they are not the evidence above or a security audit.

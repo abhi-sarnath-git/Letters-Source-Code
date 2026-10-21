@@ -11,7 +11,8 @@ Updated 21 October 2026. Checked items describe completed work, not security cer
 - [x] Offline voice call-preparation screens for sample contacts.
 - [x] Hosted Xcode simulator compilation and standalone readiness tests passed.
 - [x] Previous hosted simulator launch and screenshot capture passed (run 39517134620).
-- [ ] Inspect the new home and Alert All screenshots after this revision builds.
+- [x] New home and Alert All screenshots captured and visually inspected; cloud run 39547086390 passed.
+- [x] Alert rehearsal lifecycle tests passed, including duplicate submission, note limits and ending/restarting.
 - [x] Add Alert All local rehearsal with confirmation and duplicate-submission protection.
 - [x] Replace video calling with Alert All per owner request; retain voice calling.
 - [ ] Interactive accessibility, navigation, sticker import and small-screen QA.
