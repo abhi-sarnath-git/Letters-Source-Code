@@ -95,7 +95,12 @@ final class MessagingTests: XCTestCase {
         XCTAssertNil(content["body"])
         XCTAssertFalse(String(decoding: raw.data, as: UTF8.self).contains(body))
         let denied = try await api(base, "/_matrix/client/v3/rooms/\(escape(roomID))/event/\(escape(eventID))", token: outsiderSession.accessToken)
-        XCTAssertEqual(denied.status, 403)
+        // Synapse deliberately hides private event existence from outsiders.
+        XCTAssertEqual(denied.status, 404)
+        let denial = try XCTUnwrap(try JSONSerialization.jsonObject(with: denied.data) as? [String: Any])
+        XCTAssertEqual(denial["errcode"] as? String, "M_NOT_FOUND")
+        XCTAssertNil(denial["content"])
+        XCTAssertFalse(String(decoding: denied.data, as: UTF8.self).contains(body))
         let joinDenied = try await api(base, "/_matrix/client/v3/join/\(escape(roomID))", token: outsiderSession.accessToken, json: [:])
         XCTAssertEqual(joinDenied.status, 403)
         let registration = try await api(base, "/_matrix/client/v3/register", token: nil,
@@ -111,6 +116,13 @@ final class MessagingTests: XCTestCase {
         let plainJSON = try XCTUnwrap(try JSONSerialization.jsonObject(with: plain.data) as? [String: Any])
         let plainID = try XCTUnwrap(plainJSON["room_id"] as? String)
         try await alice.syncOnce()
+        try await bob.syncOnce()
+        do { try await bob.joinInvitation(roomID: plainID); XCTFail("Plain invitation must not remain joined") }
+        catch { XCTAssertEqual(error as? MessagingError, .encryptionUnavailable) }
+        let departed = try await api(base, "/_matrix/client/v3/rooms/\(escape(plainID))/state/m.room.member/\(escape(bobID))", token: aliceSession.accessToken)
+        XCTAssertEqual(departed.status, 200)
+        let membership = try XCTUnwrap(try JSONSerialization.jsonObject(with: departed.data) as? [String: Any])
+        XCTAssertEqual(membership["membership"] as? String, "leave")
         do { _ = try await alice.sendText("must never be sent", roomID: plainID, recipients: [bobID]); XCTFail("Plain room must fail") }
         catch { XCTAssertEqual(error as? MessagingError, .encryptionUnavailable) }
 
