@@ -5,9 +5,10 @@ import WebKit
 import SafariServices
 
 enum MarketSection: String, CaseIterable, Identifiable {
-    case stocks = "Stocks", oil = "Oil", bitcoin = "Bitcoin"
+    case stocks = "Stocks", indexes = "Indexes", oil = "Oil", bitcoin = "Bitcoin"
     // Launch flags exercise each provider view in hosted simulator checks only.
     static var launchSelection: Self {
+        if ProcessInfo.processInfo.arguments.contains("--market-indexes") { return .indexes }
         if ProcessInfo.processInfo.arguments.contains("--market-oil") { return .oil }
         if ProcessInfo.processInfo.arguments.contains("--market-bitcoin") { return .bitcoin }
         return .stocks
@@ -20,6 +21,12 @@ enum MarketSection: String, CaseIterable, Identifiable {
             .init(id: "NASDAQ:MSFT", name: "Microsoft", detail: "United States · USD"),
             .init(id: "XETR:SAP", name: "SAP", detail: "Germany · EUR · end-of-day feed"),
             .init(id: "ASX:BHP", name: "BHP", detail: "Australia · AUD · delayed feed")]
+        case .indexes: return [
+            .init(id: "SP:SPX", name: "S&P 500", detail: "United States · index points"),
+            .init(id: "NASDAQ:NDX", name: "Nasdaq 100", detail: "United States · index points"),
+            .init(id: "DJ:DJI", name: "Dow Jones Industrial Average", detail: "United States · index points"),
+            .init(id: "INDEX:DEU40", name: "DAX", detail: "Germany · index points"),
+            .init(id: "INDEX:NKY", name: "Japan 225", detail: "Japan · index points")]
         case .oil: return [
             .init(id: "TVC:USOIL", name: "WTI crude", detail: "Indicative CFD · USD per barrel"),
             .init(id: "TVC:UKOIL", name: "Brent crude", detail: "Indicative CFD · USD per barrel")]
@@ -29,6 +36,7 @@ enum MarketSection: String, CaseIterable, Identifiable {
     var note: String {
         switch self {
         case .stocks: return "A starting selection across US, German and Australian markets. Prices stay in each listing’s currency; some feeds are delayed or end-of-day."
+        case .indexes: return "Major global benchmarks, quoted in index points rather than share prices or money. Availability and delay depend on the index feed."
         case .oil: return "WTI and Brent are indicative TradingView CFD quotes, not physical spot prices or exchange futures settlements."
         case .bitcoin: return "This is Coinbase’s BTC/USD market, not a guaranteed price across every crypto exchange."
         }
@@ -58,7 +66,7 @@ struct MarketsView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("A wider orbit.").font(.title2.weight(.semibold))
-                        Text("Stocks, energy & Bitcoin").foregroundStyle(LettersTheme.secondary)
+                        Text("Stocks, indexes, energy & Bitcoin").foregroundStyle(LettersTheme.secondary)
                     }
                     Spacer()
                     OrbitalEarth(active: visible && scenePhase == .active).frame(width: 58, height: 58)
@@ -78,7 +86,7 @@ struct MarketsView: View {
                     // Fictional values must never appear as a failed-feed fallback.
                     VStack(alignment: .leading, spacing: 14) {
                         Label("SAMPLE · NOT CURRENT PRICES", systemImage: "sparkles").font(.caption.weight(.semibold)).foregroundStyle(LettersTheme.accent)
-                        Text(section == .stocks ? (selected.id == "XETR:SAP" ? "EUR 153.25" : selected.id == "ASX:BHP" ? "AUD 153.25" : "USD 153.25") : section == .oil ? "USD 78.90 / barrel" : "USD 67,890.12")
+                        Text(section == .stocks ? (selected.id == "XETR:SAP" ? "EUR 153.25" : selected.id == "ASX:BHP" ? "AUD 153.25" : "USD 153.25") : section == .indexes ? "5,123.45 points" : section == .oil ? "USD 78.90 / barrel" : "USD 67,890.12")
                             .font(.largeTitle.weight(.medium)).monospacedDigit()
                         Text("Fictional portfolio data. Normal mode loads the provider’s quote and chart.")
                             .font(.footnote).foregroundStyle(LettersTheme.secondary)

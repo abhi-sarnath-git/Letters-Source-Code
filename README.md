@@ -48,7 +48,7 @@ A development Synapse authentication module now exchanges an approved Letterbox 
 
 ## Markets from the Home menu
 
-Open **Home menu → Markets** for Stocks, Oil and Bitcoin, with a native Back button. Bottom navigation is unchanged. A fixed starting global-stock selection, WTI/Brent indicative CFDs and Coinbase BTC/USD use attributed TradingView widgets; data can be delayed, end-of-day or unavailable. No quote API key is embedded in this public repository. News topics remain separate. See [Markets implementation and limits](Docs/MARKETS.md) and the labelled portfolio capture in [Prototype Screenshots](Letters/Prototype%20Screenshots/README.md).
+Open **Home menu → Markets** for Stocks, Indexes, Oil and Bitcoin, with a native Back button. Bottom navigation is unchanged. A fixed starting global-stock selection, WTI/Brent indicative CFDs and Coinbase BTC/USD use attributed TradingView widgets; data can be delayed, end-of-day or unavailable. No quote API key is embedded in this public repository. News topics remain separate. See [Markets implementation and limits](Docs/MARKETS.md) and the labelled portfolio capture in [Prototype Screenshots](Letters/Prototype%20Screenshots/README.md).
 
 ## Download Letters
 

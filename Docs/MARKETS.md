@@ -1,10 +1,11 @@
 # Markets — Home-menu destination
 
-Open **Home menu → Markets → Markets · Stocks, Oil & Bitcoin**. Markets is a pushed screen with a native Back button, not a new bottom tab. The existing Chats, Updates, Calls, Alert All and You tabs are unchanged. The provider view is destroyed when hidden or backgrounded; returning reloads it.
+Open **Home menu → Explore → Markets**. Markets is a pushed screen with a native Back button, not a new bottom tab. The existing Chats, Updates, Calls, Alert All and You tabs are unchanged. The provider view is destroyed when hidden or backgrounded; returning reloads it.
 
-The screen has Stocks/Oil/Bitcoin sections and an instrument picker:
+The screen has Stocks/Indexes/Oil/Bitcoin sections and an instrument picker:
 
 - Stocks: a starting global selection of Apple and Microsoft (US/USD), SAP (Germany/EUR, end-of-day widget feed) and BHP (Australia/AUD, delayed widget feed). This is not a complete global security search.
+- Indexes: S&P 500, Nasdaq 100, Dow Jones Industrial Average, DAX and Japan 225. These are benchmark values in index points; provider access/delays may differ from exchange feeds.
 - Oil: TradingView TVC WTI and Brent indicative CFD quotes, USD/barrel. These are not physical spot prices or exchange futures settlements.
 - Bitcoin: Coinbase BTC/USD, explicitly venue-specific.
 

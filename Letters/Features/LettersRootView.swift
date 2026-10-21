@@ -68,9 +68,9 @@ struct ConversationListView: View {
                                 Label(runnerPaused ? "Resume news and atom" : "Pause news and atom", systemImage: runnerPaused ? "play.fill" : "pause.fill")
                             }
                         }
-                        Section("Markets") {
+                        Section("Explore") {
                             Button { DispatchQueue.main.async { showMarkets = true } } label: {
-                                Label("Markets · Stocks, Oil & Bitcoin", systemImage: "chart.line.uptrend.xyaxis")
+                                Label("Markets", systemImage: "chart.line.uptrend.xyaxis")
                             }
                         }
                         Section("Connect") {

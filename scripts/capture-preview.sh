@@ -1,5 +1,6 @@
 #!/bin/bash
-set -euo pipefail
+# Trace simulator operations for diagnostics; this script carries fictional data only.
+set -euxo pipefail
 
 # Runs only the fictional, offline portfolio preview on a hosted simulator.
 preview_device=$(xcrun simctl list devices available --json | python3 -c '
@@ -45,9 +46,15 @@ xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/lette
 
 # Exercise the real provider separately from portfolio fixtures. These diagnostic
 # captures are inspected for availability; they are not published as current prices.
-for market_topic in stocks oil bitcoin; do
+for market_topic in stocks indexes oil bitcoin; do
   xcrun simctl terminate "$preview_device" com.example.letters
   xcrun simctl launch "$preview_device" com.example.letters --check-market-quotes --preview-world-pulse "--market-$market_topic"
   sleep 15
   xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-markets-live-$market_topic.png"
 done
+
+# A second labelled portfolio capture shows index points, not currency prices.
+xcrun simctl terminate "$preview_device" com.example.letters
+xcrun simctl launch "$preview_device" com.example.letters --preview-markets --preview-world-pulse --market-indexes
+sleep 4
+xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-market-indexes.png"
