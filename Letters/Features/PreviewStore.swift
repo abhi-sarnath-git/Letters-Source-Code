@@ -22,6 +22,7 @@ struct PreviewConversation: Identifiable {
 
 /// Sample state only. No networking, credentials, delivery receipts, or encryption claims.
 @MainActor final class PreviewStore: ObservableObject {
+    @Published var alertAll = AlertAllPreviewState()
     @Published var stickers = PreviewSticker.orbitPack
     @Published var conversations: [PreviewConversation] = [
         .init(id: "home", name: "The home team", initials: "HT", group: true,

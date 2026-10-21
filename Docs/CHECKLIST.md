@@ -8,9 +8,12 @@ Updated 21 October 2026. Checked items describe completed work, not security cer
 - [x] Letters app name and beige-envelope icon with an S seal.
 - [x] Native space-age SwiftUI chat preview with fictional in-memory data.
 - [x] Local Orbit stickers and PNG/JPEG import interface.
-- [x] Offline voice/video call-preparation screens for sample contacts.
+- [x] Offline voice call-preparation screens for sample contacts.
 - [x] Hosted Xcode simulator compilation and standalone readiness tests passed.
-- [ ] Verify hosted simulator launch and inspect its real screenshot.
+- [x] Previous hosted simulator launch and screenshot capture passed (run 39517134620).
+- [ ] Inspect the new home and Alert All screenshots after this revision builds.
+- [x] Add Alert All local rehearsal with confirmation and duplicate-submission protection.
+- [x] Replace video calling with Alert All per owner request; retain voice calling.
 - [ ] Interactive accessibility, navigation, sticker import and small-screen QA.
 - [ ] Physical iPhone signing and distribution.
 
@@ -33,7 +36,8 @@ No paid upgrade, scheduled retry, running server or working messaging service is
 - [ ] Invite-only account creation, removal and session revocation.
 - [ ] Encrypted rooms/media, secure key storage, device verification and recovery.
 - [ ] Prove encrypted delivery between two independent devices with no plaintext fallback.
-- [ ] Integrate and verify encrypted voice/video calls, including relay behavior.
+- [ ] Integrate and verify encrypted voice calls, including relay behavior.
+- [ ] Encrypted Alert All to all approved members, truthful acknowledgements and resolution.
 - [ ] Push notifications and iOS background calling behavior.
 - [ ] Persistent encrypted messages and stickers; importable sticker packs.
 - [ ] Complete remaining feature families in FEATURE_PARITY.md and perform security review.

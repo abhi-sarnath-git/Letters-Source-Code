@@ -2,15 +2,17 @@ import SwiftUI
 
 struct LettersRootView: View {
     @StateObject private var store = PreviewStore()
+    @State private var selectedTab = ProcessInfo.processInfo.arguments.contains("--preview-alert-all") ? 3 : 0
 
     var body: some View {
-        TabView {
-            ConversationListView().tabItem { Label("Chats", systemImage: "bubble.left.and.bubble.right") }
+        TabView(selection: $selectedTab) {
+            ConversationListView().tabItem { Label("Chats", systemImage: "bubble.left.and.bubble.right") }.tag(0)
             FeaturePreviewView(title: "Updates", icon: "circle.dashed", subtitle: "Life, in little moments.",
                 features: ["Status updates and audience controls", "Private channels and broadcasts", "Communities and announcements"])
-                .tabItem { Label("Updates", systemImage: "circle.dashed") }
-            LettersCallsView().tabItem { Label("Calls", systemImage: "phone") }
-            LettersSettingsView().tabItem { Label("You", systemImage: "person.crop.circle") }
+                .tabItem { Label("Updates", systemImage: "circle.dashed") }.tag(1)
+            LettersCallsView().tabItem { Label("Calls", systemImage: "phone") }.tag(2)
+            AlertAllView().tabItem { Label("Alert All", systemImage: "exclamationmark.triangle") }.tag(3)
+            LettersSettingsView().tabItem { Label("You", systemImage: "person.crop.circle") }.tag(4)
         }
         .tint(LettersTheme.accent)
         .environmentObject(store)
@@ -181,9 +183,6 @@ struct ChatPreviewView: View {
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 if let contact = chat, !contact.group {
-                    Button { callDraft = CallDraft(contact: contact, kind: .video) } label: {
-                        Image(systemName: "video")
-                    }.accessibilityLabel("Preview video call with \(contact.name)")
                     Button { callDraft = CallDraft(contact: contact, kind: .voice) } label: {
                         Image(systemName: "phone")
                     }.accessibilityLabel("Preview voice call with \(contact.name)")
@@ -200,7 +199,7 @@ struct ChatPreviewView: View {
         }
         .sheet(isPresented: $showFeatureInfo) {
             PreviewExplanation(title: "Part of the Letters roadmap", icon: "sparkles",
-                detail: "Encrypted calls and attachments are required for Letters. These controls show the intended experience; they do not place calls, capture media, or send files yet.")
+                detail: "Encrypted voice calls and attachments are required for Letters. These controls show the intended experience; they do not place calls, capture media, or send files yet.")
         }
     }
 }
@@ -246,7 +245,7 @@ struct LettersSettingsView: View {
                     Label("Device verification and recovery", systemImage: "key")
                 }
                 Section("Current build") {
-                    Text("Design preview only. No account, server, push notifications, calls, or cryptographic SDK is connected.")
+                    Text("Design preview only. No account, server, push notifications, calls, alerts, or cryptographic SDK is connected.")
                     Text("Use sample content only. This build cannot send private messages.")
                 }
                 Section("Accessibility") {

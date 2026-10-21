@@ -22,3 +22,9 @@ sleep 4
 xcrun simctl spawn "$preview_device" launchctl list | grep com.example.letters
 mkdir -p "$RUNNER_TEMP/letters-preview"
 xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-home.png"
+
+xcrun simctl terminate "$preview_device" com.example.letters
+xcrun simctl launch "$preview_device" com.example.letters --preview-alert-all
+sleep 3
+xcrun simctl spawn "$preview_device" launchctl list | grep com.example.letters
+xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-alert-all.png"

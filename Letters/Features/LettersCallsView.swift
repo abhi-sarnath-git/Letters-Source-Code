@@ -1,8 +1,8 @@
 import SwiftUI
 
 enum CallKind: String, CaseIterable {
-    case voice = "Voice", video = "Video"
-    var icon: String { self == .voice ? "phone.fill" : "video.fill" }
+    case voice = "Voice"
+    var icon: String { "phone.fill" }
 }
 
 struct CallDraft: Identifiable {
@@ -31,7 +31,7 @@ struct LettersCallsView: View {
                             .foregroundStyle(LettersTheme.accent).accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 5) {
                             Text("Across the distance.").font(.title2.weight(.medium))
-                            Text("A familiar face. A familiar voice.")
+                            Text("A familiar voice, wherever you are.")
                                 .font(.subheadline).foregroundStyle(LettersTheme.secondary)
                         }
                     }
@@ -39,7 +39,7 @@ struct LettersCallsView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Label("Calling setup required", systemImage: "info.circle")
                             .font(.headline)
-                        Text("Explore voice and video call screens with sample contacts. No call is placed, and your microphone and camera stay off.")
+                        Text("Explore voice call screens with sample contacts. No call is placed, and your microphone stays off. Alert All replaces video calling in Letters.")
                             .font(.subheadline).foregroundStyle(LettersTheme.secondary)
                     }.padding(18).frame(maxWidth: .infinity, alignment: .leading)
                         .background(LettersTheme.surface, in: RoundedRectangle(cornerRadius: 22))
@@ -114,15 +114,10 @@ struct CallPreparationView: View {
                         Text(draft.contact.name).font(.largeTitle.weight(.medium))
                         Text("Not connected").foregroundStyle(LettersTheme.secondary)
                     }
-                    Picker("Call type", selection: $selectedKind) {
-                        ForEach(CallKind.allCases, id: \.self) { kind in
-                            Label(kind.rawValue, systemImage: kind.icon).tag(kind)
-                        }
-                    }.pickerStyle(.segmented)
                     VStack(alignment: .leading, spacing: 14) {
                         Label("Private contacts only", systemImage: "person.2.badge.key")
                         Label("End-to-end encryption required", systemImage: "lock.shield")
-                        Label("Microphone and camera are off", systemImage: "mic.slash")
+                        Label("Microphone is off", systemImage: "mic.slash")
                     }.font(.subheadline).foregroundStyle(LettersTheme.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading).padding(20)
                         .background(LettersTheme.surface, in: RoundedRectangle(cornerRadius: 22))
@@ -140,7 +135,7 @@ struct CallPreparationView: View {
                 .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
                 .sheet(isPresented: $showSetup) {
                     PreviewExplanation(title: "Bring your people closer", icon: selectedKind.icon,
-                        detail: "We still need private accounts, server-enforced contact access, the MatrixRTC calling engine, an authorization service and a media relay. Then we'll verify encrypted calls between two independent iPhones, including blocked contacts, reconnects and camera/microphone permissions. A free server experiment is the next step.")
+                        detail: "We still need private accounts, server-enforced contact access, the MatrixRTC calling engine, an authorization service and a media relay. Then we'll verify encrypted calls between two independent iPhones, including blocked contacts, reconnects and microphone permissions. A free server experiment is the next step.")
                 }
         }
     }

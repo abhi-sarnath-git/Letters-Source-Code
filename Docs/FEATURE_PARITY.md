@@ -1,6 +1,6 @@
 # Letters feature-parity target
 
-Baseline: WhatsApp consumer iPhone experience, reviewed 21 October 2026. All feature families below remain requirements. This is an initial inventory, not a completed exhaustive audit of every regional rollout, numerical limit, or edge case. A versioned behavior-level audit is required before claiming identical features. Family-only access changes discovery and membership; it must not become an excuse to drop messaging features.
+Baseline: WhatsApp consumer iPhone experience, reviewed 21 October 2026. All feature families below remain requirements except the owner-approved replacement of video calling with Alert All on 21 October 2026. This is an initial inventory, not a completed exhaustive audit of every regional rollout, numerical limit, or edge case. A versioned behavior-level audit is required before claiming identical features. Family-only access changes discovery and membership; it must not become an excuse to drop messaging features.
 
 ## Status definitions
 
@@ -25,8 +25,9 @@ Baseline: WhatsApp consumer iPhone experience, reviewed 21 October 2026. All fea
 | Communities | Topic groups, announcements, replies, admin management | Planned |
 | Broadcasts and channels | Broadcast lists, channel posts, following, reactions and audience controls inside the invite-only network | Planned |
 | Status | Text/photo/video/voice updates, expiry, views, replies, mentions, resharing and audience controls | Planned; roadmap screen only |
-| Calling | Encrypted voice/video, one-to-one and groups, incoming/background calls, missed calls, mute, speaker, camera switching | One-to-one voice/video entry points and offline preparation screens in preview; real calls, group calling and infrastructure remain planned. See CALLING.md |
-| Advanced calling | Call links, scheduling, screen sharing, picture-in-picture, video effects/backgrounds | Planned |
+| Calling | Encrypted voice, one-to-one and groups, incoming/background calls, missed calls, mute, speaker | Voice-only offline preparation screens; live calls remain planned. Video calling replaced by Alert All. See CALLING.md |
+| Alert All | Confirmed emergency alert to every approved member, encrypted details, truthful delivery/acknowledgement state and resolution | Local rehearsal UI and lifecycle tests; live encrypted alerts and notifications remain planned. See ALERT_ALL.md |
+| Advanced calling | Voice call links and scheduling | Planned; video-specific screen sharing, picture-in-picture and effects removed with video calling |
 | Security | E2EE, device verification, key change warnings, secure local storage, encrypted media and key recovery | Planned; mandatory before real messaging |
 | Privacy | Disappearing messages, view-once media, locked chats/app, blocked users, granular audience/presence/read controls | Planned |
 | Devices and backups | Linked devices, secure sync, revocation, recovery, encrypted backup/restore, migration | Planned |
@@ -39,7 +40,7 @@ Baseline: WhatsApp consumer iPhone experience, reviewed 21 October 2026. All fea
 
 ## Milestones
 
-1. Portfolio foundation: original identity, native navigation, sample interactions. **Prepared; native build and UI QA pending.**
+1. Portfolio foundation: original identity, native navigation, sample interactions. **Native build and hosted simulator launch passed; interactive UI QA pending.**
 2. Encrypted messaging pilot: server, accounts, invites, Matrix SDK, verified devices, encrypted text/media and recovery. **Not implemented.**
 3. Messaging completeness: action parity, groups, media, privacy, reliable offline behavior and notifications. **Not implemented.**
 4. Calls and updates: encrypted calling, background calls, status, communities, channels and broadcasts. **Not implemented.**

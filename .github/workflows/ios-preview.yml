@@ -25,7 +25,7 @@ jobs:
           persist-credentials: false
       - name: Show selected Xcode
         run: xcodebuild -version
-      - name: Test release-readiness bookkeeping
+      - name: Test alert rehearsal lifecycle and release-readiness bookkeeping
         working-directory: LettersCore
         run: swift test
       - name: Build unsigned iPhone simulator preview
@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: letters-iphone-preview
-          path: ${{ runner.temp }}/letters-preview/letters-home.png
+          path: ${{ runner.temp }}/letters-preview/*.png
           if-no-files-found: error
           retention-days: 7
 
