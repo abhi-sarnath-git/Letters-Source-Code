@@ -46,6 +46,10 @@ A development Synapse authentication module now exchanges an approved Letterbox 
 
 `LettersMessaging` now pins Matrix Rust SDK Swift **26.10.02**, with Keychain session storage, a keyed persistent SDK store, private encrypted rooms, guarded text sending, session restore and logout. The hosted workflow tests this against ephemeral loopback Synapse **1.163.0**, including recipient decryption and raw server ciphertext checks. See [implementation, test evidence and limits](Docs/ENCRYPTED_MESSAGING.md). The You tab includes an honest development status screen. **This is not yet a usable private messenger:** real Letterbox/account integration, live chat UI, device verification, recovery, media and notifications remain outstanding.
 
+## Markets from the Home menu
+
+Open **Home menu → Markets** for Stocks, Oil and Bitcoin, with a native Back button. Bottom navigation is unchanged. A fixed starting global-stock selection, WTI/Brent indicative CFDs and Coinbase BTC/USD use attributed TradingView widgets; data can be delayed, end-of-day or unavailable. No quote API key is embedded in this public repository. News topics remain separate. See [Markets implementation and limits](Docs/MARKETS.md) and the labelled portfolio capture in [Prototype Screenshots](Letters/Prototype%20Screenshots/README.md).
+
 ## Download Letters
 
 **No iPhone download or TestFlight invitation is available yet.** [Download/install guide](Docs/DOWNLOADS.md) explains the free source/simulator route, personal iPhone testing with Xcode, and future family/friend installation through TestFlight.

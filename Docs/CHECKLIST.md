@@ -88,3 +88,16 @@ Finish app functionality before discussing deployment. Continue with the encrypt
 
 - [x] Group Home navigation by intent (Chats & People, Around the World, Connect, Safety, You); keep shallow submenus and common shortcuts.
 - [x] Add reduced-motion-aware fades, deferred menu navigation and a stable article reading snapshot.
+
+
+## Markets — Home drop-down only
+
+- [x] Keep repository public per owner preference; no new license selected.
+- [x] Add Home menu Markets destination; retain the existing five bottom tabs.
+- [x] Add Stocks/Oil/Bitcoin sections, instrument selection, attribution, source links and reload.
+- [x] Identify currencies, delayed/end-of-day feeds, indicative oil CFDs and venue-specific Bitcoin.
+- [x] Isolate provider in ephemeral WebKit storage and stop it when hidden/backgrounded.
+- [x] Native build and labelled Markets sample capture passed (run 39682680676).
+- [x] Inspect sample capture and verify artifact SHA-256 before portfolio publication.
+- [ ] Inspect diagnostic actual-provider simulator captures for all three categories.
+- [ ] Physical-device/VoiceOver/large-text/offline/provider-availability interaction QA.

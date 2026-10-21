@@ -32,6 +32,14 @@ The image uses a **fictional, labelled sample headline**, not an actual news eve
 
 Capture source: `28731c4bba2aede95609ea84e528bd337a566a28`, [Home refinement run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39556128782). The original three screenshots below retain their earlier source provenance.
 
+## Markets — opened from Home drop-down
+
+Stocks, Oil and Bitcoin have a dedicated screen reached from the Home menu, with Back navigation and no new bottom tab. Sections and an instrument picker separate global share listings, WTI/Brent indicative CFDs and Coinbase BTC/USD. Normal mode uses attributed provider widgets, with currency/feed/venue labels and reload/source actions.
+
+<img src="05-markets-preview.png" alt="Native Letters Markets screen showing Stocks, Oil and Bitcoin sections and explicitly fictional sample prices" width="320">
+
+This original native capture shows **fictional sample prices**, prominently labelled “SAMPLE · NOT CURRENT PRICES.” It does not show an actual TradingView quote/chart or certify current prices. Source `1d637be383d532576b36957df45e909803c207c8`, [capture run 39682680676](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39682680676), original screenshot artifact SHA-256 `70a3e9a2bc816877a453c7318098cb1cc829f1c2737a72debfbcee7cc6b02e42`. Image inspected after checksum verification. See [MARKETS.md](../../Docs/MARKETS.md) for supported instruments and outstanding provider/device QA.
+
 ## Verification and provenance
 
 - Source: [`fe2ee0c5b552b0d2f1b3bf4a83f0f45d38b467e9`](https://github.com/abhi-sarnath-git/Letters-Source-Code/commit/fe2ee0c5b552b0d2f1b3bf4a83f0f45d38b467e9).
