@@ -94,10 +94,12 @@ Finish app functionality before discussing deployment. Continue with the encrypt
 
 - [x] Keep repository public per owner preference; no new license selected.
 - [x] Add Home menu Markets destination; retain the existing five bottom tabs.
-- [x] Add Stocks/Oil/Bitcoin sections, instrument selection, attribution, source links and reload.
+- [x] Add Stocks/Indexes/Oil/Bitcoin sections, instrument selection, attribution, source links and reload.
 - [x] Identify currencies, delayed/end-of-day feeds, indicative oil CFDs and venue-specific Bitcoin.
 - [x] Isolate provider in ephemeral WebKit storage and stop it when hidden/backgrounded.
 - [x] Native build and labelled Markets sample capture passed (run 39682680676).
 - [x] Inspect sample capture and verify artifact SHA-256 before portfolio publication.
-- [ ] Inspect diagnostic actual-provider simulator captures for all three categories.
+- [x] Inspect actual-provider simulator captures for Apple, WTI and Coinbase Bitcoin (run 39684615837); provider quotes rendered.
+- [x] Inspect Indexes provider capture and four-section sample image (run 39687281594). S&P 500 is provider-restricted in the widget; its source link remains available.
+- [ ] Resolve embedded index quote availability; check every remaining catalogue instrument and interactive switching on a physical device.
 - [ ] Physical-device/VoiceOver/large-text/offline/provider-availability interaction QA.

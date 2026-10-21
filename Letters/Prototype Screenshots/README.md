@@ -40,6 +40,16 @@ Stocks, Oil and Bitcoin have a dedicated screen reached from the Home menu, with
 
 This original native capture shows **fictional sample prices**, prominently labelled “SAMPLE · NOT CURRENT PRICES.” It does not show an actual TradingView quote/chart or certify current prices. Source `1d637be383d532576b36957df45e909803c207c8`, [capture run 39682680676](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39682680676), original screenshot artifact SHA-256 `70a3e9a2bc816877a453c7318098cb1cc829f1c2737a72debfbcee7cc6b02e42`. Image inspected after checksum verification. See [MARKETS.md](../../Docs/MARKETS.md) for supported instruments and outstanding provider/device QA.
 
+## Markets — Indexes added
+
+The Home-menu Markets screen now has **Stocks, Indexes, Oil and Bitcoin**. Indexes offers S&P 500, Nasdaq 100, Dow Jones, DAX and Japan 225, with values identified as index points.
+
+<img src="06-market-indexes-preview.png" alt="Letters Markets with four sections and Indexes selected, explicitly labelled fictional sample index points" width="320">
+
+This original native screenshot uses **fictional sample values**, labelled “SAMPLE · NOT CURRENT PRICES.” The normal-mode S&P 500 check revealed a provider restriction: its embedded widget directs users to TradingView rather than displaying a quote. Other index feeds remain unverified. This image demonstrates the completed interface, not working embedded index prices.
+
+Capture source: `6701fd9a0864d92b700d20f333f4e82e121e4c10`, [successful build and capture run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39687281594). Original screenshot artifact SHA-256: `d169fcbda77c669b796a8d119c8bf676d0b8acfc4578ddd42a5de2e2ea5ea277`. Image inspected after checksum verification, without retouching.
+
 ## Verification and provenance
 
 - Source: [`fe2ee0c5b552b0d2f1b3bf4a83f0f45d38b467e9`](https://github.com/abhi-sarnath-git/Letters-Source-Code/commit/fe2ee0c5b552b0d2f1b3bf4a83f0f45d38b467e9).

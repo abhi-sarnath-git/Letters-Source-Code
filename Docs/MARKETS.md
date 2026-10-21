@@ -25,3 +25,9 @@ Reload and Open source remain available if a symbol/feed fails. Letters does not
 - [Meaning and limits of TVC instruments](https://www.tradingview.com/support/solutions/43000709178-what-does-tvc-stand-for-in-the-instrument-ticker/)
 
 No real user accounts, chat infrastructure, messaging behavior or repository visibility changed. Source stays public at the owner's request; no new open-source license is selected.
+
+## Verification
+
+Run [39684615837](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39684615837) passed native compilation and tests. The downloaded screenshot artifact SHA-256 was `acb3d15f6ddcd4be46a3a9fc0fbc7e605f24bf89ca8c6815e6dc6fabe9ebc17d`. Actual normal-mode simulator captures were inspected for Apple, WTI and Coinbase Bitcoin: attributed provider quotes/charts rendered, including a delayed-data marker for Apple. This verifies those default instruments at capture time, not every catalogue symbol, current prices, physical-device interaction or universal real-time availability.
+
+The Indexes update passed native compilation and all workflow checks in [run 39687281594](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39687281594), source `6701fd9a0864d92b700d20f333f4e82e121e4c10`. Screenshot artifact SHA-256: `d169fcbda77c669b796a8d119c8bf676d0b8acfc4578ddd42a5de2e2ea5ea277`. Both the four-section sample and actual S&P 500 widget were inspected. **S&P 500 is not available inside this widget**: the provider displays “This symbol is only available on TradingView.” Open source offers the provider page. Other index feeds have not been individually verified; the Indexes UI is complete, but embedded index quote coverage remains unresolved. No fabricated quote is substituted.
