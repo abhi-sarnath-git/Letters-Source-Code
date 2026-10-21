@@ -1,0 +1,2 @@
+# Isolated hosted test server; not shipped in the iPhone application.
+matrix-synapse==1.163.0

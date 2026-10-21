@@ -18,6 +18,7 @@ import urllib.request
 SERVER_SOURCE = Path(__file__).resolve().parents[1] / 'server'
 sys.path.insert(0, str(SERVER_SOURCE))
 from letterbox_service import LetterboxService
+from synapse.api.errors import Codes
 
 
 def request(base, path, data=None, token=None):
@@ -117,8 +118,8 @@ def main():
                     raise RuntimeError('Approved session must sync before removal')
                 admission.deactivate(owner['session_token'], probe_member['member_id'])
                 status, denied = request(base, '/_matrix/client/v3/sync?timeout=0', token=token)
-                if status != 403 or denied.get('errcode') != 'M_EXPIRED_ACCOUNT':
-                    raise RuntimeError('Removed admission must block an existing session')
+                if status != 403 or denied.get('errcode') != Codes.EXPIRED_ACCOUNT:
+                    raise RuntimeError('Removed admission must block an existing session: status=' + str(status) + ', category=' + str(denied.get('errcode')))
                 print('Letterbox login/replay/expiry/account-binding/removal boundaries passed.', flush=True)
                 grants = {name: admission.issue_matrix_login(member['session_token'])
                           for name, member in members.items() if name != 'probe'}

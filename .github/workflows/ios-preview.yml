@@ -40,10 +40,13 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: '3.12'
+          # Cache public dependency wheels only, never test accounts or SDK stores.
+          cache: pip
+          cache-dependency-path: scripts/requirements-integration.txt
       - name: Install pinned test homeserver
         run: |
           python -m venv "$RUNNER_TEMP/letters-synapse-venv"
-          "$RUNNER_TEMP/letters-synapse-venv/bin/python" -m pip install --disable-pip-version-check 'matrix-synapse==1.163.0'
+          "$RUNNER_TEMP/letters-synapse-venv/bin/python" -m pip install --disable-pip-version-check -r scripts/requirements-integration.txt
       # The harness uses synthetic accounts on loopback; secrets/databases are never artifacts.
       - name: Verify real encrypted messaging and server boundaries
         run: '"$RUNNER_TEMP/letters-synapse-venv/bin/python" scripts/test-encrypted-messaging.py'
