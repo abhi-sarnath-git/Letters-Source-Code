@@ -73,6 +73,9 @@ Finish app functionality before discussing deployment. Continue with the encrypt
 - [x] Implement category runner for global stocks, oil, crypto and world headlines.
 - [x] Add attributed RSS client, bounded parser, category caches and honest offline/age states.
 - [x] Add pause, Reduce Motion and foreground-only lifecycle handling.
-- [ ] Verify hosted parser/live-feed tests and native compilation.
-- [ ] Inspect and publish the labelled-sample Home screenshot to Prototype Screenshots.
+- [x] Hosted parser tests, all four live Guardian feeds, native compilation and captures passed (run 39556128782).
+- [x] Inspect and publish the labelled-sample orbital Home screenshot as `04-orbital-home-news-preview.png`.
 - [ ] Interactive device/accessibility/offline lifecycle QA.
+
+- [x] Group Home navigation by intent (Chats & People, Around the World, Connect, Safety, You); keep shallow submenus and common shortcuts.
+- [x] Add reduced-motion-aware fades, deferred menu navigation and a stable article reading snapshot.
