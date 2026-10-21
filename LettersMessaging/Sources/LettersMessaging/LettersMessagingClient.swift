@@ -161,8 +161,19 @@ public actor LettersMessagingClient {
         guard let room = try sdk.getRoom(roomId: roomID), room.membership() == .invited else {
             throw MessagingError.notInvited
         }
-        guard try await room.latestEncryptionState() == .encrypted else { throw MessagingError.encryptionUnavailable }
+        // Invited users cannot fetch full room state on a private homeserver.
+        // Joining sends no message or room keys. Inspect state as a member and
+        // leave on failure; guardedRoom still independently blocks every send.
         try await room.join()
+        do {
+            _ = try await sdk.syncOnceV2(settings: SyncSettingsV2(timeoutMs: 0))
+            guard try await room.latestEncryptionState() == .encrypted else {
+                throw MessagingError.encryptionUnavailable
+            }
+        } catch {
+            try? await room.leave()
+            throw error
+        }
     }
 
     private func guardedRoom(_ roomID: String, recipients: Set<String>) async throws -> Room {

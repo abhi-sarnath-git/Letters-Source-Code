@@ -288,7 +288,7 @@ struct LettersSettingsView: View {
                     }
                 }
                 Section("Current build") {
-                    Text("Design preview only. No live account, server, push notifications, calls, alerts, is connected to the preview. The Matrix encryption SDK is linked for separate development tests. Letterbox invitations are local previews.")
+                    Text("Design preview only. Live accounts, private chats, notifications, calls and alerts are not connected to the preview. The Matrix encryption SDK is linked for separate development tests. Letterbox invitations are local previews.")
                     Text("Use sample content only. This build cannot send private messages.")
                 }
                 Section("Accessibility") {
