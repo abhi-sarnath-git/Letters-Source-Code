@@ -20,6 +20,7 @@ struct LettersRootView: View {
 }
 
 struct ConversationListView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var selectedTab: Int
     @State private var newsCategory = WorldNewsCategory.world
     @State private var runnerPaused = false
@@ -46,31 +47,37 @@ struct ConversationListView: View {
                     WorldPulseView(category: $newsCategory, paused: $runnerPaused)
                     Spacer()
                     Menu {
-                        Section("Around the world") {
-                            Picker("News category", selection: $newsCategory) {
-                                ForEach(WorldNewsCategory.allCases) { category in
-                                    Text(category.rawValue).tag(category)
+                        Section("Chats & People") {
+                            Menu {
+                                Picker("Conversation filter", selection: $filter) {
+                                    ForEach(filters, id: \.self) { item in Text(item).tag(item) }
                                 }
-                            }
+                            } label: { Label("Filter chats", systemImage: "line.3.horizontal.decrease.circle") }
+                            Button { openInvitations() } label: { Label("Letterbox invitations & groups", systemImage: "envelope.open") }
+                        }
+                        Section("Around the World") {
+                            Menu {
+                                Picker("News category", selection: $newsCategory) {
+                                    ForEach(WorldNewsCategory.allCases) { category in Text(category.rawValue).tag(category) }
+                                }
+                            } label: { Label("News topics", systemImage: "globe") }
                             Button { runnerPaused.toggle() } label: {
                                 Label(runnerPaused ? "Resume news and atom" : "Pause news and atom", systemImage: runnerPaused ? "play.fill" : "pause.fill")
                             }
                         }
-                        Section("Conversations") {
-                            Picker("Conversation filter", selection: $filter) {
-                                ForEach(filters, id: \.self) { item in Text(item).tag(item) }
-                            }
-                            Button { showInviteInfo = true } label: { Label("Letterbox invitations & groups", systemImage: "envelope.open") }
+                        Section("Connect") {
+                            Button { navigate(to: 2) } label: { Label("Voice calls", systemImage: "phone") }
+                            Button { navigate(to: 1) } label: { Label("Updates", systemImage: "circle.dashed") }
                         }
-                        Section("Letters") {
-                            Button { selectedTab = 2 } label: { Label("Voice calls", systemImage: "phone") }
-                            Button { selectedTab = 3 } label: { Label("Alert All", systemImage: "exclamationmark.triangle") }
-                            Button { selectedTab = 1 } label: { Label("Updates", systemImage: "circle.dashed") }
-                            Button { selectedTab = 4 } label: { Label("Your profile & settings", systemImage: "person.crop.circle") }
+                        Section("Safety") {
+                            Button { navigate(to: 3) } label: { Label("Alert All", systemImage: "exclamationmark.triangle") }
+                        }
+                        Section("You") {
+                            Button { navigate(to: 4) } label: { Label("Profile & settings", systemImage: "person.crop.circle") }
                         }
                     } label: {
                         Image(systemName: "line.3.horizontal.circle").font(.title2).frame(width: 44, height: 44)
-                    }.accessibilityLabel("Home menu: news, chats and Letters features")
+                    }.accessibilityLabel("Home menu: chats, news, connect, safety and you")
 
                 }.padding(.horizontal, 20).padding(.vertical, 14)
 
@@ -130,6 +137,7 @@ struct ConversationListView: View {
                 }
                 PreviewNotice()
             }
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: filter)
             .background(OrbitBackdrop()).toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { ChatPreviewView(conversationID: $0) }
             .sheet(isPresented: $showInviteInfo) {
@@ -137,6 +145,14 @@ struct ConversationListView: View {
             }
         }
     }
+    private func navigate(to tab: Int) {
+        // Allow the system menu to begin dismissing before changing destinations.
+        DispatchQueue.main.async { selectedTab = tab }
+    }
+    private func openInvitations() {
+        DispatchQueue.main.async { showInviteInfo = true }
+    }
+
 }
 
 struct ChatPreviewView: View {

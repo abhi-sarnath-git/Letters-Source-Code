@@ -37,7 +37,7 @@ Alert All replaces video calling by owner request. Emergency details, acknowledg
 7. Offline queues, duplicates, failed uploads and retries preserve encryption and correct user-visible status.
 8. Calling and other feature families receive their own cryptographic and platform validation before being enabled.
 
-The current portfolio preview has no networking and no cryptographic dependency. It cannot be used to send encrypted messages. Its unit tests exercise release bookkeeping and local alert rehearsal state; they are not the evidence above or a security audit.
+The current portfolio preview has no messaging transport or cryptographic dependency. Home uses isolated public RSS requests for news; see WORLD_PULSE.md. Those requests contain no chats, contact lists or invitation credentials. It cannot be used to send encrypted messages. Its unit tests exercise release bookkeeping and local alert rehearsal state; they are not the evidence above or a security audit.
 
 ## Letterbox admission prototype
 

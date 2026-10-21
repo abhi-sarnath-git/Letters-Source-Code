@@ -27,3 +27,7 @@ The Guardian documents RSS for personal, non-commercial use. Revisit publisher p
 Sources:
 - https://www.theguardian.com/help/feeds
 - https://www.theguardian.com/help/terms-of-service
+
+## Navigation / transition refinement
+
+Home menu groups actions by intent: Chats & People (filters, invitations/groups); Around the World (topics and pause); Connect (voice and updates); Safety (Alert All); You (profile/settings). Filters and topics use one shallow submenu, avoiding a long mixed list. Common filter chips and bottom tabs stay as shortcuts. System menus begin dismissal before destination changes; native navigation keeps back/dismiss behavior consistent. Short fades soften headline and filter changes, with no transition animation when Reduce Motion is enabled. An open headline holds a snapshot of its title/link/category so a background refresh cannot replace what the person is reading.

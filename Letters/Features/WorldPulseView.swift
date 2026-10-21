@@ -34,6 +34,8 @@ struct WorldPulseView: View {
     @State private var visible = false
     @State private var index = 0
     @State private var showHeadline = false
+    @State private var reading: WorldHeadline?
+    @State private var readingCategory = WorldNewsCategory.world
     private var fixture: Bool { ProcessInfo.processInfo.arguments.contains("--preview-world-pulse") }
     private var items: [WorldHeadline] {
         if fixture { return [.init(title: "Sample headline — explore stories from around the world", url: WorldNewsCategory.world.sourceURL, publishedAt: nil)] }
@@ -57,6 +59,8 @@ struct WorldPulseView: View {
             }
             HStack(alignment: .center, spacing: 10) {
                 Button {
+                    reading = selected
+                    readingCategory = category
                     showHeadline = true
                 } label: {
                     HStack(spacing: 8) {
@@ -64,6 +68,8 @@ struct WorldPulseView: View {
                             .frame(width: 5, height: 5).accessibilityHidden(true)
                         Text(selected?.title ?? (pulse.loading ? "Fetching latest headlines…" : "Headlines unavailable. Will retry while Home is open."))
                             .font(.subheadline).multilineTextAlignment(.leading).lineLimit(2)
+                            .id(selected?.id ?? category.rawValue)
+                            .transition(.opacity)
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     }.foregroundStyle(.white)
                 }.buttonStyle(.plain).disabled(selected == nil)
@@ -81,6 +87,7 @@ struct WorldPulseView: View {
                 }
             }.font(.caption2).foregroundStyle(LettersTheme.secondary)
         }
+        .animation(reduceMotion || paused ? nil : .easeInOut(duration: 0.22), value: selected?.id)
         .padding(16).background(LettersTheme.surface.opacity(0.9), in: RoundedRectangle(cornerRadius: 22))
         .onAppear { visible = true }
         .onDisappear { visible = false }
@@ -103,8 +110,8 @@ struct WorldPulseView: View {
             NavigationStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
-                        Text(category.rawValue).font(.caption).foregroundStyle(LettersTheme.accent)
-                        if let selected {
+                        Text(readingCategory.rawValue).font(.caption).foregroundStyle(LettersTheme.accent)
+                        if let selected = reading {
                             Text(selected.title).font(.title2.weight(.medium))
                             if let published = selected.publishedAt {
                                 Text("Published \(published.formatted(date: .abbreviated, time: .shortened))").font(.caption)

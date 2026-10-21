@@ -12,7 +12,7 @@ Letters is the app name. **Letters' Source Code** is this public portfolio proje
 
 ## What this build actually does
 
-This is a native SwiftUI portfolio foundation, not a working private messaging service. It has Letters branding, a custom icon, chat navigation, sample conversations, search, unread/favorites/group filters, a local sample-message composer, settings, and honest roadmap screens for voice calls and updates. All data is fictional and held in memory. There is no account, network transport, encryption engine, server, push service, or real call functionality yet. No sample messages leave the app. Restarting resets the samples.
+This is a native SwiftUI portfolio foundation, not a working private messaging service. It has Letters branding, a custom icon, chat navigation, sample conversations, search, unread/favorites/group filters, a local sample-message composer, settings, and honest roadmap screens for voice calls and updates. All data is fictional and held in memory. There is no live messaging account, messaging transport, encryption engine, deployed server, push service, or real call functionality yet. Home separately fetches public news headlines; conversation data is not sent to that service. No sample messages leave the app. Restarting resets the samples.
 
 The space-age revision adds a beige-envelope/S-seal icon, static starfield, cyan accents, six symbol-based Orbit stickers, and local PNG/JPEG sticker imports. Native sticker code has passed a hosted Xcode build; interactive sticker QA remains outstanding. Imports disappear when the app restarts. Whole sticker packs, animation, persistence and real encrypted sticker delivery are still outstanding. See `Docs/DESIGN_DIRECTION.md` and `Docs/FREE_OPTIONS.md`.
 
