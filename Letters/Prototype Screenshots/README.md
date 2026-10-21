@@ -2,7 +2,7 @@
 
 Original screenshots of Letters running in an iPhone 16 Pro simulator, captured on 21 October 2026 with Xcode 16.4 / iOS 18.5. These are actual native SwiftUI screens, not design mockups. All conversations and profiles are fictional.
 
-**Current stage: portfolio prototype with live public news; messaging remains local.** These screenshots demonstrate completed local interfaces and behavior, not working encrypted communication. E2EE, live messages, voice calls, emergency notifications and cross-device invitation redemption remain unimplemented. Home now fetches public news separately; the new Home screenshot deliberately uses an identified sample headline.
+**Current stage: portfolio prototype with live public news; messaging remains local.** These screenshots demonstrate completed local interfaces and behavior, not working encrypted communication. Live encrypted messages in these interfaces, voice calls, emergency notifications and cross-device invitation redemption remain unavailable. A separate Matrix encryption development package now exists; see [its implementation and test limits](../../Docs/ENCRYPTED_MESSAGING.md). These images are not evidence of encrypted delivery. Home now fetches public news separately; the new Home screenshot deliberately uses an identified sample headline.
 
 ## Chats — local interface
 

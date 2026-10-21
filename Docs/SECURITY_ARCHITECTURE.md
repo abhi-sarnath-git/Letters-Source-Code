@@ -1,8 +1,8 @@
-# Security architecture — proposed, not implemented
+# Security architecture — implementation in progress
 
 ## Foundation
 
-Use supported Matrix Rust SDK Swift bindings for sessions, synchronization, encrypted rooms, encrypted attachments, device trust, and recovery. Do not create a custom cryptographic protocol or treat TLS as E2EE. Pin and review an SDK release and its known limitations before integration. The SDK alone does not deliver WhatsApp feature parity or guarantee the security of our app.
+The separate LettersMessaging development package pins Matrix Rust SDK Swift bindings 26.10.02. See [the implemented boundary and integration evidence](ENCRYPTED_MESSAGING.md). The native sample composer is not connected. Continue using supported Matrix Rust SDK Swift bindings for sessions, synchronization, encrypted rooms, encrypted attachments, device trust, and recovery. Do not create a custom cryptographic protocol or treat TLS as E2EE. Pin and review an SDK release and its known limitations before integration. The SDK alone does not deliver WhatsApp feature parity or guarantee the security of our app.
 
 ## Membership boundary
 
@@ -37,7 +37,7 @@ Alert All replaces video calling by owner request. Emergency details, acknowledg
 7. Offline queues, duplicates, failed uploads and retries preserve encryption and correct user-visible status.
 8. Calling and other feature families receive their own cryptographic and platform validation before being enabled.
 
-The current portfolio preview has no messaging transport or cryptographic dependency. Home uses isolated public RSS requests for news; see WORLD_PULSE.md. Those requests contain no chats, contact lists or invitation credentials. It cannot be used to send encrypted messages. Its unit tests exercise release bookkeeping and local alert rehearsal state; they are not the evidence above or a security audit.
+The current portfolio composer has no messaging transport. Its separate LettersMessaging package links the Matrix SDK for development and integration tests, not for live preview chats. Home uses isolated public RSS requests for news; see WORLD_PULSE.md. Those requests contain no chats, contact lists or invitation credentials. It cannot be used to send encrypted messages. Its unit tests exercise release bookkeeping and local alert rehearsal state; they are not the evidence above or a security audit.
 
 ## Letterbox admission prototype
 

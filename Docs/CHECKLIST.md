@@ -51,7 +51,13 @@ No paid upgrade, scheduled retry, running server or working messaging service is
 
 ## Working private messenger
 
-- [ ] Integrate and pin reviewed Matrix SDK Swift bindings.
+- [x] Pin and link Matrix Rust SDK Swift 26.10.02 in a separate development package.
+- [x] Implement guarded encrypted text/session operations and Keychain-backed session storage.
+- [x] Verify independent SDK-client decryption, raw server ciphertext, outsider read/join denial and disabled signup.
+- [x] Verify plaintext/audience guards, plaintext-invitation departure and device-preserving session restore in isolated Synapse.
+- [x] Compile the native iPhone simulator app with the pinned SDK linked.
+- [ ] Verify real iPhone Keychain/locked-device/reinstall behavior and independent physical devices.
+- [ ] Finish contact verification, recovery, native account/chat integration and security review.
 - [ ] Invite-only account creation, removal and session revocation.
 - [ ] Encrypted rooms/media, secure key storage, device verification and recovery.
 - [ ] Prove encrypted delivery between two independent devices with no plaintext fallback.
@@ -61,7 +67,7 @@ No paid upgrade, scheduled retry, running server or working messaging service is
 - [ ] Persistent encrypted messages and stickers; importable sticker packs.
 - [ ] Complete remaining feature families in FEATURE_PARITY.md and perform security review.
 
-The current app is an offline portfolio preview. End-to-end encryption and live calls remain release requirements and are not implemented.
+The native chats remain a portfolio preview. A separate encrypted-messaging development boundary now exists; live native chats, verified identities, recovery and encrypted calls remain release gates. See ENCRYPTED_MESSAGING.md for the exact scope and test evidence.
 
 ## Current owner preference
 

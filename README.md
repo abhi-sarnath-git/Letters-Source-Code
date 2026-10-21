@@ -12,7 +12,7 @@ Letters is the app name. **Letters' Source Code** is this public portfolio proje
 
 ## What this build actually does
 
-This is a native SwiftUI portfolio foundation, not a working private messaging service. It has Letters branding, a custom icon, chat navigation, sample conversations, search, unread/favorites/group filters, a local sample-message composer, settings, and honest roadmap screens for voice calls and updates. All data is fictional and held in memory. There is no live messaging account, messaging transport, encryption engine, deployed server, push service, or real call functionality yet. Home separately fetches public news headlines; conversation data is not sent to that service. No sample messages leave the app. Restarting resets the samples.
+This is a native SwiftUI portfolio foundation, not a working private messaging service. It has Letters branding, a custom icon, chat navigation, sample conversations, search, unread/favorites/group filters, a local sample-message composer, settings, and honest roadmap screens for voice calls and updates. All data is fictional and held in memory. The preview has no live account, chat transport, deployed server, push service or real calls. A separate development package now links a pinned Matrix encryption SDK and implements encrypted text/session operations; it is not connected to the sample composer or Letterbox admission. Home separately fetches public news headlines; conversation data is not sent to that service. No sample messages leave the app. Restarting resets the samples.
 
 The space-age revision adds a beige-envelope/S-seal icon, static starfield, cyan accents, six symbol-based Orbit stickers, and local PNG/JPEG sticker imports. Native sticker code has passed a hosted Xcode build; interactive sticker QA remains outstanding. Imports disappear when the app restarts. Whole sticker packs, animation, persistence and real encrypted sticker delivery are still outstanding. See `Docs/DESIGN_DIRECTION.md` and `Docs/FREE_OPTIONS.md`.
 
@@ -34,6 +34,10 @@ A separate loopback-only Python admission service implements persistent, server-
 
 Home now replaces the Letters word heading with an animated Earth/atom, alongside “Live Around The World.” Its menu selects World News, Global Stocks, Oil or Crypto headlines from The Guardian. Normal mode refreshes while Home is visible; screenshot mode uses a labelled sample. Source timestamps, unavailable/cached states, a pause control and Reduce Motion handling are included. This is news, not market quotes. See [implementation and verification limits](Docs/WORLD_PULSE.md).
 
+## Encrypted messaging development
+
+`LettersMessaging` now pins Matrix Rust SDK Swift **26.10.02**, with Keychain session storage, a keyed persistent SDK store, private encrypted rooms, guarded text sending, session restore and logout. The hosted workflow tests this against ephemeral loopback Synapse **1.163.0**, including recipient decryption and raw server ciphertext checks. See [implementation, test evidence and limits](Docs/ENCRYPTED_MESSAGING.md). The You tab includes an honest development status screen. **This is not yet a usable private messenger:** real Letterbox/account integration, live chat UI, device verification, recovery, media and notifications remain outstanding.
+
 ## Download Letters
 
 **No iPhone download or TestFlight invitation is available yet.** [Download/install guide](Docs/DOWNLOADS.md) explains the free source/simulator route, personal iPhone testing with Xcode, and future family/friend installation through TestFlight.
@@ -50,9 +54,9 @@ This Mac was inspected on 21 October 2026: macOS 13.7.8, Swift 5.8.1 command-lin
 
 ### GitHub Actions — recommended for this public project
 
-The included `.github/workflows/ios-preview.yml` runs standalone checklist tests and builds the unsigned iPhone simulator app on a standard hosted Mac. It runs on pushes to `main`, pull requests, or manual dispatch. Standard GitHub-hosted runners are free for public repositories, subject to GitHub's usage policies. The workflow has a 20-minute timeout, cancels superseded runs, requests read-only repository access, and saves preview screenshots for seven days. No Apple signing account or cloud secrets are needed. The workflow also boots an available iPhone simulator, launches the offline preview and captures its home, Alert All and Letterbox screens. The [Alert All revision](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39547086390) passed: package tests, native compilation, both simulator launches and both screenshot captures. Both screenshots were visually inspected; interactive UI and accessibility testing remain outstanding. The [first cloud run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39512206616) passed: checklist tests and native simulator compilation succeeded. This is compilation evidence, not an interactive UI test or proof of E2EE.
+The included `.github/workflows/ios-preview.yml` runs standalone checklist tests and builds the unsigned iPhone simulator app on a standard hosted Mac. It runs on pushes to `main`, pull requests, or manual dispatch. Standard GitHub-hosted runners are free for public repositories, subject to GitHub's usage policies. The workflow has a 30-minute timeout, cancels superseded runs, requests read-only repository access, and saves preview screenshots for seven days. No Apple signing account or cloud secrets are needed. The workflow also boots an available iPhone simulator, launches the offline preview and captures its home, Alert All and Letterbox screens. The [Alert All revision](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39547086390) passed: package tests, native compilation, both simulator launches and both screenshot captures. Both screenshots were visually inspected; interactive UI and accessibility testing remain outstanding. The [first cloud run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39512206616) passed: checklist tests and native simulator compilation succeeded. This is compilation evidence, not an interactive UI test or proof of E2EE.
 
-An unsigned simulator build is not an installable iPhone release. This workflow does not publish an app, provide an interactive simulator, provision a messaging server, or establish working encryption.
+An unsigned simulator build is not an installable iPhone release. This workflow does not publish an app, provide an interactive simulator, provision a deployed messaging service, or establish production security. The new isolated encryption test has its own limited evidence and outstanding gates, described above.
 
 ### Local Xcode and alternative builds
 
@@ -66,7 +70,7 @@ The [per-member Letterbox build](https://github.com/abhi-sarnath-git/Letters-Sou
 
 ## Next engineering milestone
 
-Integrate the Matrix Rust SDK's supported Swift bindings, pin a reviewed release, and provision an invite-only server. Require encrypted rooms and encrypted media without plaintext fallback. Implement secure session storage, device verification, recovery, account lifecycle, and revoke/ban behavior. Prove messaging between two independent devices before describing Letters as an encrypted messenger. Calls require a separate encrypted calling integration and verification.
+Connect the pinned Matrix client boundary to server-enforced Letterbox admission and native accounts/chats; complete review and private test infrastructure. Require encrypted rooms and encrypted media without plaintext fallback. Implement secure session storage, device verification, recovery, account lifecycle, and revoke/ban behavior. Prove messaging between two independent devices before describing Letters as an encrypted messenger. Calls require a separate encrypted calling integration and verification.
 
 Track progress in [the project checklist](Docs/CHECKLIST.md). See `Docs/FEATURE_PARITY.md` and `Docs/SECURITY_ARCHITECTURE.md` for the full target and outstanding work. These requirements remain outstanding, not silently removed to fit a portfolio demo.
 
@@ -79,4 +83,4 @@ Track progress in [the project checklist](Docs/CHECKLIST.md). See `Docs/FEATURE_
 - Matrix Rust SDK: https://github.com/matrix-org/matrix-rust-sdk
 - Swift bindings: https://github.com/matrix-org/matrix-rust-components-swift
 
-No Element application source has been copied. A future SDK integration must retain its required license notices and attribution. Present Letters in a portfolio as original product/UI work using an established messaging SDK, with the actual implementation status clearly stated.
+No Element application source has been copied. The pinned SDK's Apache license is retained in Docs/ThirdParty; a full transitive dependency notice inventory remains a release gate. Present Letters in a portfolio as original product/UI work using an established messaging SDK, with the actual implementation status clearly stated.
