@@ -6,6 +6,12 @@ import SafariServices
 
 enum MarketSection: String, CaseIterable, Identifiable {
     case stocks = "Stocks", oil = "Oil", bitcoin = "Bitcoin"
+    // Launch flags exercise each provider view in hosted simulator checks only.
+    static var launchSelection: Self {
+        if ProcessInfo.processInfo.arguments.contains("--market-oil") { return .oil }
+        if ProcessInfo.processInfo.arguments.contains("--market-bitcoin") { return .bitcoin }
+        return .stocks
+    }
     var id: String { rawValue }
     var instruments: [MarketInstrument] {
         switch self {
@@ -38,8 +44,8 @@ struct MarketInstrument: Identifiable {
 
 struct MarketsView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @State private var section = MarketSection.stocks
-    @State private var selectedID = "NASDAQ:AAPL"
+    @State private var section = MarketSection.launchSelection
+    @State private var selectedID = MarketSection.launchSelection.instruments[0].id
     @State private var visible = false
     @State private var reloadID = UUID()
     @State private var article: MarketArticle?

@@ -30,7 +30,7 @@ struct ConversationListView: View {
     @State private var search = ""
     @State private var filter = "All"
     @State private var showInviteInfo = ProcessInfo.processInfo.arguments.contains("--preview-letterbox")
-    @State private var showMarkets = ProcessInfo.processInfo.arguments.contains("--preview-markets")
+    @State private var showMarkets = ProcessInfo.processInfo.arguments.contains("--preview-markets") || ProcessInfo.processInfo.arguments.contains("--check-market-quotes")
     private let filters = ["All", "Unread", "Favorites", "Groups"]
 
     private var visibleConversations: [PreviewConversation] {

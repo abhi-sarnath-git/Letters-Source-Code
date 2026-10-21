@@ -42,3 +42,12 @@ xcrun simctl launch "$preview_device" com.example.letters --preview-markets --pr
 sleep 4
 xcrun simctl spawn "$preview_device" launchctl list | grep com.example.letters
 xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-markets.png"
+
+# Exercise the real provider separately from portfolio fixtures. These diagnostic
+# captures are inspected for availability; they are not published as current prices.
+for market_topic in stocks oil bitcoin; do
+  xcrun simctl terminate "$preview_device" com.example.letters
+  xcrun simctl launch "$preview_device" com.example.letters --check-market-quotes --preview-world-pulse "--market-$market_topic"
+  sleep 15
+  xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-markets-live-$market_topic.png"
+done
