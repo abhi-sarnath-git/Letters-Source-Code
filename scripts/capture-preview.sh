@@ -34,3 +34,4 @@ xcrun simctl launch "$preview_device" com.example.letters --preview-letterbox
 sleep 3
 xcrun simctl spawn "$preview_device" launchctl list | grep com.example.letters
 xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-letterbox.png"
+swift scripts/verify-letterbox-qr.swift "$RUNNER_TEMP/letters-preview/letters-letterbox.png"

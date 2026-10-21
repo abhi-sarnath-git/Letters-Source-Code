@@ -47,7 +47,7 @@ struct ConversationListView: View {
                     }
                     Spacer()
                     Button { showInviteInfo = true } label: {
-                        Image(systemName: "envelope.badge.person.crop").font(.title3).frame(width: 44, height: 44)
+                        Image(systemName: "envelope.open").font(.title3).frame(width: 44, height: 44)
                     }.accessibilityLabel("Open Letterbox invitations")
                 }.padding(.horizontal, 20).padding(.vertical, 18)
 

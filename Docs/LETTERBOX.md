@@ -2,7 +2,9 @@
 
 ## Implemented on 21 October 2026
 
-The native preview has an invite/accept flow from the envelope button on Chats:
+The native preview has an invite/accept flow from the envelope button on Chats. Every approved member can issue their own Letterbox QR. Contact relationships are per member: when Maya invites Alex, Alex and Maya become contacts, while the owner and unrelated members gain no contact access. A clearly labelled local profile selector lets you demonstrate each fictional member’s separate contact list and empty conversations; it is not live account switching or a production member directory. Every profile can create its own sample groups and administer their invitations.
+
+Implemented flow:
 
 - Generate a one-use, 24-hour preview invitation and a matching QR code.
 - Share the typed code, scan a QR with the camera, or read a PNG/JPEG QR image locally.
@@ -53,7 +55,7 @@ An initial member invitation authorizes admission directly, as agreed; there is 
 python3 -m unittest discover -s server -v
 ```
 
-Tests cover expiry, revocation, replay (including six concurrent attempts), hashed storage, invalid input, invalid sessions/names, scope separation, unauthorized group admission, contact privacy, direct-room deduplication, membership deactivation and persistence. Swift package tests separately cover native parser parity between QR/manual codes and local lifecycle behavior.
+Tests cover expiry, revocation, replay (including six concurrent attempts), hashed storage, invalid input, invalid sessions/names, scope separation, unauthorized group admission, contact privacy, direct-room deduplication, membership deactivation, per-member invitation chains, independent group administration, HTTP authentication/origin/body boundaries and persistence. Swift package tests separately cover native parser parity between QR/manual codes and local lifecycle behavior.
 
 ## Remaining integration before family use
 

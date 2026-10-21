@@ -22,7 +22,7 @@ At the owner's request, video calling is replaced by **Alert All**, intended to 
 
 ## Letterbox invitations
 
-The envelope button on Chats now opens Letterbox. Generate a one-use, expiring QR/code, scan or enter it, review it, and accept as a sample member. Member invitations add one sample contact and an empty local conversation. Group invitations are separate and require an existing approved member. Revocation, expiry and replay checks are implemented locally. **Preview codes work only in this session, not across devices.**
+The envelope button on Chats now opens Letterbox. Every member can create their own Letterbox QR; accepting links only the inviter and recipient as contacts. The local profile selector demonstrates separate contact lists and personal group administration. Generate a one-use, expiring QR/code, scan or enter it, review it, and accept as a sample member. Member invitations add one sample contact and an empty local conversation. Group invitations are separate and require an existing approved member. Revocation, expiry and replay checks are implemented locally. **Preview codes work only in this session, not across devices.**
 
 A separate loopback-only Python admission service implements persistent, server-enforced invitation and membership rules, with tests for concurrent redemption, revocation and private contact/group access. It is not deployed or connected to the native preview and has no encrypted message transport. See [Letterbox implementation and integration limits](Docs/LETTERBOX.md). Real accounts, private cross-device chats and E2EE remain outstanding.
 

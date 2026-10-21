@@ -11,10 +11,12 @@ struct LetterboxView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var mode = 0
     @State private var groupID = ""
+    @State private var groupName = ""
     @State private var code = ""
     @State private var name = ""
     @State private var receiverID = ""
     @State private var reviewed: LetterboxInvitation?
+    @State private var shownInvitation: LetterboxInvitation?
     @State private var showScanner = false
     @State private var importQR = false
     @State private var error: String?
@@ -27,10 +29,17 @@ struct LetterboxView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    Label("Your people, by invitation.", systemImage: "envelope.badge.shield.half.filled")
+                    Label("Your people, by invitation.", systemImage: "envelope.open.fill")
                         .font(.title2.weight(.medium)).foregroundStyle(LettersTheme.accent)
                     Text("Local preview · these codes work only in this app session. No account is created online and no private messages are sent.")
                         .font(.subheadline).foregroundStyle(LettersTheme.secondary)
+                    Picker("Local preview profile", selection: Binding(
+                        get: { store.letterbox.activeMemberID },
+                        set: { store.switchLetterboxProfile($0); groupID = ""; receiverID = ""; code = ""; notice = nil })) {
+                        ForEach(store.letterbox.members) { member in Text(member.name).tag(member.id) }
+                    }
+                    Text("Profile switching is for this offline demonstration only. Each profile has its own contacts, invitations and sample conversations.")
+                        .font(.caption).foregroundStyle(LettersTheme.secondary)
                     Picker("Letterbox action", selection: $mode) {
                         Text("Invite").tag(0)
                         Text("Accept").tag(1)
@@ -48,8 +57,33 @@ struct LetterboxView: View {
                 .sheet(isPresented: $showScanner) {
                     LetterboxScanner { payload in
                         showScanner = false
-                        code = payload
-                        review()
+                        do {
+                            code = try LetterboxPreview.canonicalCode(payload)
+                            notice = "QR read locally. Choose a sample member, then review."
+                        } catch { self.error = error.localizedDescription }
+                    }
+                }
+                .sheet(item: $shownInvitation) { invitation in
+                    NavigationStack {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 22) {
+                                Text("Invited by \(store.letterbox.members.first(where: { $0.id == invitation.issuerID })?.name ?? "Member")").font(.title2)
+                                Text("One-use local preview · expires in 24 hours").foregroundStyle(LettersTheme.secondary)
+                                if let image = qrImage(invitation.qrPayload) {
+                                    Image(uiImage: image).interpolation(.none).resizable().scaledToFit()
+                                        .padding(20).background(.white, in: RoundedRectangle(cornerRadius: 18))
+                                        .frame(maxWidth: 260).frame(maxWidth: .infinity)
+                                        .accessibilityLabel("Letterbox preview QR. Matching code follows.")
+                                }
+                                Text(invitation.code).font(.system(.body, design: .monospaced)).textSelection(.enabled)
+                                Text("This QR and code represent the same invitation. They work only in this app session; they cannot grant online access.")
+                                    .font(.subheadline).foregroundStyle(LettersTheme.secondary)
+                                ShareLink(item: "Letters LOCAL PREVIEW only. \(invitation.qrPayload)") {
+                                    Label("Share matching code", systemImage: "square.and.arrow.up")
+                                }.frame(minHeight: 44)
+                            }.padding(24)
+                        }.background(OrbitBackdrop()).navigationTitle("Letterbox QR")
+                            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { shownInvitation = nil } } }
                     }
                 }
                 .sheet(item: $reviewed) { invitation in
@@ -73,7 +107,7 @@ struct LetterboxView: View {
                     Button("Keep invitation", role: .cancel) { revokeID = nil }
                 }
                 .onAppear {
-                    if screenshotMode && store.letterbox.invitations.isEmpty { generate() }
+                    if screenshotMode && store.letterbox.invitations.isEmpty { generate(); shownInvitation = store.letterbox.invitations.first }
                 }
         }
     }
@@ -82,7 +116,7 @@ struct LetterboxView: View {
         VStack(alignment: .leading, spacing: 18) {
             Picker("Invitation access", selection: $groupID) {
                 Text("Join Letters + add you as a contact").tag("")
-                ForEach(store.conversations.filter(\.group)) { group in
+                ForEach(store.conversations.filter { $0.group && store.letterbox.canInvite(to: $0.id) }) { group in
                     Text("Join group: \(group.name)").tag(group.id)
                 }
             }.pickerStyle(.menu)
@@ -92,7 +126,18 @@ struct LetterboxView: View {
                 Label("Create preview invitation", systemImage: "qrcode")
                     .frame(maxWidth: .infinity, minHeight: 46)
             }.buttonStyle(.borderedProminent).tint(LettersTheme.accent).foregroundStyle(LettersTheme.background)
-            ForEach(store.letterbox.invitations) { invitation in
+            DisclosureGroup("Create your own sample group") {
+                TextField("Group name", text: $groupName).padding(.vertical, 12)
+                Button("Create group") {
+                    do {
+                        groupID = try store.letterbox.createGroup(name: groupName)
+                        groupName = ""
+                        store.refreshLetterboxConversations()
+                        notice = "Group created locally. Create separate invitations for its members."
+                    } catch { self.error = error.localizedDescription }
+                }.frame(minHeight: 44)
+            }
+            ForEach(store.letterbox.invitations.filter { $0.issuerID == store.letterbox.activeMemberID }) { invitation in
                 invitationCard(invitation)
             }
         }
@@ -100,6 +145,8 @@ struct LetterboxView: View {
 
     private func invitationCard(_ invitation: LetterboxInvitation) -> some View {
         VStack(alignment: .leading, spacing: 14) {
+            Text("Invited by \(store.letterbox.members.first(where: { $0.id == invitation.issuerID })?.name ?? "Member")")
+                .font(.caption).foregroundStyle(LettersTheme.secondary)
             Text(invitation.groupID.flatMap { id in store.conversations.first(where: { $0.id == id })?.name } ?? "Letters membership + your contact")
                 .font(.headline)
             if invitation.isAvailable(at: Date()) {
@@ -109,6 +156,7 @@ struct LetterboxView: View {
                         .frame(maxWidth: 220).frame(maxWidth: .infinity)
                         .accessibilityLabel("Preview invitation QR code. The matching code follows.")
                 }
+                Button("Open invitation QR") { shownInvitation = invitation }.frame(minHeight: 44)
                 Text(invitation.code).font(.system(.caption, design: .monospaced))
                     .textSelection(.enabled).accessibilityLabel("Letterbox preview code: \(invitation.code)")
                 Text("One use · expires \(invitation.expiresAt.formatted(date: .abbreviated, time: .shortened))")
@@ -146,7 +194,7 @@ struct LetterboxView: View {
             }.frame(minHeight: 44)
             Picker("Accept as", selection: $receiverID) {
                 Text("New sample member").tag("")
-                ForEach(store.letterbox.members.filter { $0.id != LetterboxPreview.ownerID }) { member in
+                ForEach(store.letterbox.members) { member in
                     Text(member.name).tag(member.id)
                 }
             }
@@ -176,7 +224,7 @@ struct LetterboxView: View {
                             let member = try store.acceptLetterbox(invitation.code, name: name, existingID: receiverID.isEmpty ? nil : receiverID)
                             receiverID = member.id
                             code = ""; name = ""; reviewed = nil
-                            notice = invitation.groupID == nil ? "\(member.name) is now a sample contact. Open Chats for an empty conversation." : "Sample group membership updated. No old messages were shared."
+                            notice = invitation.groupID == nil ? "\(member.name) is now a sample contact. Open Chats for an empty conversation." : "Sample group membership updated. Switch to that profile to see its empty group conversation."
                         } catch { reviewed = nil; self.error = error.localizedDescription }
                     }.buttonStyle(.borderedProminent).frame(minHeight: 48)
                 }.padding(24)

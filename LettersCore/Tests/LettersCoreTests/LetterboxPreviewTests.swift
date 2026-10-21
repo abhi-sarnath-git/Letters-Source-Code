@@ -49,4 +49,31 @@ final class LetterboxPreviewTests: XCTestCase {
         XCTAssertNil(try box.inspect(invitation.code, now: now).usedBy)
         XCTAssertEqual(box.members.count, 3)
     }
+    func testEveryMemberCanInviteAndContactListsRemainSeparate() throws {
+        var box = LetterboxPreview()
+        try box.selectProfile("maya")
+        let invite = try box.issue(secret: secret, now: now)
+        XCTAssertEqual(invite.issuerID, "maya")
+        let alex = try box.redeem(invite.code, name: "Alex", now: now)
+        XCTAssertTrue(box.contacts(for: "maya").contains(alex.id))
+        XCTAssertEqual(box.contacts(for: alex.id), ["maya"])
+        XCTAssertFalse(box.contacts(for: LetterboxPreview.ownerID).contains(alex.id))
+        try box.selectProfile(alex.id)
+        let own = try box.issue(secret: String(repeating: "B", count: 32), now: now)
+        XCTAssertEqual(own.issuerID, alex.id)
+        let sam = try box.redeem(own.code, name: "Sam", now: now)
+        XCTAssertEqual(box.contacts(for: sam.id), [alex.id])
+        XCTAssertFalse(box.contacts(for: "maya").contains(sam.id))
+        let group = try box.createGroup(name: "Alex's friends")
+        XCTAssertTrue(box.canInvite(to: group))
+        let groupInvite = try box.issue(secret: String(repeating: "C", count: 32), groupID: group, now: now)
+        try box.selectProfile("maya")
+        XCTAssertFalse(box.canInvite(to: group))
+        box.revoke(groupInvite.id)
+        XCTAssertFalse(try box.inspect(groupInvite.code, now: now).revoked)
+        _ = try box.redeem(groupInvite.code, name: "", existingMemberID: sam.id, now: now)
+        XCTAssertTrue(box.groupMembers[group]!.contains(sam.id))
+        XCTAssertFalse(box.groupMembers[group]!.contains("maya"))
+    }
+
 }

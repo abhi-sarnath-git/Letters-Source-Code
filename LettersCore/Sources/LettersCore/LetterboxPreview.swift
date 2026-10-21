@@ -22,6 +22,7 @@ public struct LetterboxMember: Identifiable, Equatable {
 
 public struct LetterboxInvitation: Identifiable, Equatable {
     public let id: UUID
+    public let issuerID: String
     public let code: String
     public let groupID: String?
     public let expiresAt: Date
@@ -40,8 +41,28 @@ public struct LetterboxPreview {
     ]
     public private(set) var invitations: [LetterboxInvitation] = []
     public private(set) var groupMembers: [String: Set<String>] = ["home": [ownerID], "weekend": [ownerID]]
-    public private(set) var contactIDs: Set<String> = ["maya", "dad"]
-    private let administeredGroupIDs: Set<String> = ["home", "weekend"]
+    public private(set) var activeMemberID = ownerID
+    private var contactPairs: Set<Set<String>> = [[ownerID, "maya"], [ownerID, "dad"]]
+    public private(set) var groupNames: [String: String] = ["home": "The home team", "weekend": "Weekend people"]
+    private var groupAdmins: [String: String] = ["home": ownerID, "weekend": ownerID]
+    public var contactIDs: Set<String> { contacts(for: activeMemberID) }
+    public func contacts(for memberID: String) -> Set<String> {
+        Set(contactPairs.filter { $0.contains(memberID) }.flatMap { $0 }.filter { $0 != memberID })
+    }
+    public func canInvite(to groupID: String) -> Bool { groupAdmins[groupID] == activeMemberID }
+    public mutating func selectProfile(_ id: String) throws {
+        guard members.contains(where: { $0.id == id }) else { throw LetterboxError.memberRequired }
+        activeMemberID = id
+    }
+    public mutating func createGroup(name: String) throws -> String {
+        let cleaned = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty, cleaned.count <= 40 else { throw LetterboxError.nameRequired }
+        let id = UUID().uuidString
+        groupNames[id] = cleaned
+        groupAdmins[id] = activeMemberID
+        groupMembers[id] = [activeMemberID]
+        return id
+    }
     public init() {}
 
     public static func canonicalCode(_ input: String) throws -> String {
@@ -64,11 +85,11 @@ public struct LetterboxPreview {
     }
 
     @discardableResult public mutating func issue(secret: String, groupID: String? = nil, now: Date = Date()) throws -> LetterboxInvitation {
-        if let groupID, !administeredGroupIDs.contains(groupID) { throw LetterboxError.forbidden }
-        guard invitations.filter({ $0.isAvailable(at: now) }).count < 20 else { throw LetterboxError.limit }
+        if let groupID, !canInvite(to: groupID) { throw LetterboxError.forbidden }
+        guard invitations.filter({ $0.issuerID == activeMemberID && $0.isAvailable(at: now) }).count < 20 else { throw LetterboxError.limit }
         let code = try Self.canonicalCode("DEMO-LBOX-" + secret)
         guard !invitations.contains(where: { $0.code == code }) else { throw LetterboxError.unavailable }
-        let invite = LetterboxInvitation(id: UUID(), code: code, groupID: groupID, expiresAt: now.addingTimeInterval(86400))
+        let invite = LetterboxInvitation(id: UUID(), issuerID: activeMemberID, code: code, groupID: groupID, expiresAt: now.addingTimeInterval(86400))
         invitations.insert(invite, at: 0)
         return invite
     }
@@ -87,7 +108,7 @@ public struct LetterboxPreview {
         let invite = try inspect(input, now: now)
         let member: LetterboxMember
         if let existingMemberID {
-            guard let existing = members.first(where: { $0.id == existingMemberID }), existing.id != Self.ownerID else {
+            guard let existing = members.first(where: { $0.id == existingMemberID }), existing.id != invite.issuerID else {
                 throw LetterboxError.memberRequired
             }
             member = existing
@@ -101,14 +122,14 @@ public struct LetterboxPreview {
             members.append(member)
         }
         if let group = invite.groupID { groupMembers[group, default: []].insert(member.id) }
-        else { contactIDs.insert(member.id) }
+        else { contactPairs.insert([invite.issuerID, member.id]) }
         let index = invitations.firstIndex(where: { $0.id == invite.id })!
         invitations[index].usedBy = member.id
         return member
     }
 
     public mutating func revoke(_ id: UUID) {
-        guard let index = invitations.firstIndex(where: { $0.id == id }), invitations[index].usedBy == nil else { return }
+        guard let index = invitations.firstIndex(where: { $0.id == id }), invitations[index].issuerID == activeMemberID, invitations[index].usedBy == nil else { return }
         invitations[index].revoked = true
     }
 }

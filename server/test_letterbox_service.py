@@ -1,9 +1,11 @@
 import concurrent.futures
 import json
+from io import BytesIO
+from email.message import Message
 from pathlib import Path
 import tempfile
 import unittest
-from letterbox_service import LetterboxService, Denied
+from letterbox_service import LetterboxService, Denied, handler
 
 
 class AdmissionTests(unittest.TestCase):
@@ -99,6 +101,47 @@ class AdmissionTests(unittest.TestCase):
         with self.assertRaises(Denied): self.service.issue(self.token)
         reloaded=LetterboxService(self.path,clock=lambda:self.now)
         self.assertEqual(reloaded.contacts(self.token),[])
+
+    def test_http_adapter_enforces_auth_origin_and_body_limits(self):
+        def request(path, data, token=None, origin=None):
+            http=object.__new__(handler(self.service))
+            http.path=path
+            http.request_version='HTTP/1.1'
+            http.command='POST'
+            http.requestline='POST '+path+' HTTP/1.1'
+            http.headers=Message()
+            body=json.dumps(data).encode()
+            http.headers['Content-Length']=str(len(body))
+            if token: http.headers['Authorization']='Bearer '+token
+            if origin: http.headers['Origin']=origin
+            http.rfile=BytesIO(body);http.wfile=BytesIO()
+            http.do_POST()
+            response=http.wfile.getvalue().decode()
+            return int(response.split()[1]),json.loads(response.split('\r\n\r\n',1)[1])
+        self.assertEqual(request('/v1/invitations',{})[0],403)
+        self.assertEqual(request('/v1/invitations',{},self.token,'https://untrusted.example')[0],403)
+        self.assertEqual(request('/v1/contacts',{'padding':'x'*4096},self.token)[0],403)
+        status,invite=request('/v1/invitations',{},self.token)
+        self.assertEqual(status,200)
+        status,friend=request('/v1/redeem',{'code':invite['code'],'name':'HTTP Friend'})
+        self.assertEqual(status,200)
+        self.assertEqual(request('/v1/contacts',{},friend['session_token'])[0],200)
+        self.assertEqual(request('/v1/redeem',{'code':invite['code'],'name':'Replay'})[0],403)
+        self.assertEqual(request('/v1/messages',{},self.token)[0],404)
+
+    def test_each_member_can_invite_without_expanding_other_contact_lists(self):
+        alex=self.join('Alex')
+        invitation=self.service.issue(alex['session_token'])
+        sam=self.service.redeem(invitation['code'],'Sam')
+        self.assertEqual([c['id'] for c in self.service.contacts(sam['session_token'])],[alex['member_id']])
+        self.assertEqual([c['id'] for c in self.service.contacts(self.token)],[alex['member_id']])
+        with self.assertRaises(Denied): self.service.direct(self.token,sam['member_id'])
+        group=self.service.create_group(alex['session_token'],"Alex's friends")
+        with self.assertRaises(Denied): self.service.issue(self.token,group['id'])
+        invite=self.service.issue(alex['session_token'],group['id'])
+        self.service.redeem(invite['code'],token=sam['session_token'])
+        self.assertEqual(self.service.group(sam['session_token'],group['id'])['id'],group['id'])
+        with self.assertRaises(Denied): self.service.group(self.token,group['id'])
 
 
 if __name__=='__main__': unittest.main()
