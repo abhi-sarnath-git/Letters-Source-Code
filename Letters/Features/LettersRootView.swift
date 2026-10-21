@@ -23,7 +23,7 @@ struct ConversationListView: View {
     @EnvironmentObject private var store: PreviewStore
     @State private var search = ""
     @State private var filter = "All"
-    @State private var showInviteInfo = false
+    @State private var showInviteInfo = ProcessInfo.processInfo.arguments.contains("--preview-letterbox")
     private let filters = ["All", "Unread", "Favorites", "Groups"]
 
     private var visibleConversations: [PreviewConversation] {
@@ -47,8 +47,8 @@ struct ConversationListView: View {
                     }
                     Spacer()
                     Button { showInviteInfo = true } label: {
-                        Image(systemName: "square.and.pencil").font(.title3).frame(width: 44, height: 44)
-                    }.accessibilityLabel("New conversation")
+                        Image(systemName: "envelope.badge.person.crop").font(.title3).frame(width: 44, height: 44)
+                    }.accessibilityLabel("Open Letterbox invitations")
                 }.padding(.horizontal, 20).padding(.vertical, 18)
 
                 HStack(spacing: 10) {
@@ -110,8 +110,7 @@ struct ConversationListView: View {
             .background(OrbitBackdrop()).toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { ChatPreviewView(conversationID: $0) }
             .sheet(isPresented: $showInviteInfo) {
-                PreviewExplanation(title: "By invitation, by design", icon: "person.badge.key.fill",
-                    detail: "Letters will limit accounts to your invited family and friends. Invitation creation and server-enforced access are not connected in this preview.")
+                LetterboxView(screenshotMode: ProcessInfo.processInfo.arguments.contains("--preview-letterbox"))
             }
         }
     }
@@ -245,7 +244,7 @@ struct LettersSettingsView: View {
                     Label("Device verification and recovery", systemImage: "key")
                 }
                 Section("Current build") {
-                    Text("Design preview only. No account, server, push notifications, calls, alerts, or cryptographic SDK is connected.")
+                    Text("Design preview only. No live account, server, push notifications, calls, alerts, or cryptographic SDK is connected. Letterbox invitations are local previews.")
                     Text("Use sample content only. This build cannot send private messages.")
                 }
                 Section("Accessibility") {

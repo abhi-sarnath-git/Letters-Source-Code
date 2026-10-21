@@ -23,9 +23,11 @@ jobs:
         uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: Test server admission and contact boundaries
+        run: python3 -m unittest discover -s server -v
       - name: Show selected Xcode
         run: xcodebuild -version
-      - name: Test alert rehearsal lifecycle and release-readiness bookkeeping
+      - name: Test invitations, alert lifecycle and release-readiness bookkeeping
         working-directory: LettersCore
         run: swift test
       - name: Build unsigned iPhone simulator preview

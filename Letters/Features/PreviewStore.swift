@@ -22,6 +22,7 @@ struct PreviewConversation: Identifiable {
 
 /// Sample state only. No networking, credentials, delivery receipts, or encryption claims.
 @MainActor final class PreviewStore: ObservableObject {
+    @Published var letterbox = LetterboxPreview()
     @Published var alertAll = AlertAllPreviewState()
     @Published var stickers = PreviewSticker.orbitPack
     @Published var conversations: [PreviewConversation] = [
@@ -35,18 +36,20 @@ struct PreviewConversation: Identifiable {
               unread: 1, time: "12:42", messages: [
                 .init(text: "This little corner of the internet feels like home.", outgoing: false),
                 .init(text: "That's exactly what I wanted Letters to feel like.", outgoing: true),
-                .init(text: "Coffee and a catch-up tomorrow? ☕", outgoing: false)
-              ]),
-        .init(id: "dad", name: "Dad", initials: "DA", group: false,
-              unread: 0, time: "11:28", messages: [
-                .init(text: "Made it home. Thanks for a lovely weekend.", outgoing: false),
-                .init(text: "Already looking forward to the next one.", outgoing: true)
-              ], favorite: true),
-        .init(id: "weekend", name: "Weekend people", initials: "WP", group: true,
-              unread: 0, time: "Yesterday", messages: [
-                .init(text: "Same time, new adventure?", outgoing: false)
+                .init(te…158 tokens truncated…enture?", outgoing: false)
               ])
     ]
+
+    @discardableResult func acceptLetterbox(_ code: String, name: String, existingID: String?) throws -> LetterboxMember {
+        let invitation = try letterbox.inspect(code)
+        let member = try letterbox.redeem(code, name: name, existingMemberID: existingID)
+        if invitation.groupID == nil && !conversations.contains(where: { $0.id == member.id }) {
+            let initials = String(member.name.prefix(2)).uppercased()
+            conversations.insert(.init(id: member.id, name: member.name, initials: initials, group: false,
+                                       unread: 0, time: "Preview", messages: []), at: 0)
+        }
+        return member
+    }
 
     func appendPreview(_ text: String, to id: String) {
         let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)

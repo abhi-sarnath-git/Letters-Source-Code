@@ -38,3 +38,7 @@ Alert All replaces video calling by owner request. Emergency details, acknowledg
 8. Calling and other feature families receive their own cryptographic and platform validation before being enabled.
 
 The current portfolio preview has no networking and no cryptographic dependency. It cannot be used to send encrypted messages. Its unit tests exercise release bookkeeping and local alert rehearsal state; they are not the evidence above or a security audit.
+
+## Letterbox admission prototype
+
+See LETTERBOX.md. A separate loopback-only admission service implements hashed invitations/sessions, transactional single-use redemption, restricted contact/group metadata and member deactivation. It is not deployed, not production reviewed and not connected to Matrix or the native preview. The native demo codes are deliberately separate from service codes. Neither prototype grants a client the authority to declare real membership or encryption.

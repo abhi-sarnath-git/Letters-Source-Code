@@ -20,9 +20,15 @@ The calling revision adds searchable sample contacts, voice buttons in direct ch
 
 At the owner's request, video calling is replaced by **Alert All**, intended to notify **all approved Letters members** during an emergency. Voice calling stays in scope. The new tab offers an optional note, confirmation, a local rehearsal record and an end-rehearsal action. It sends nothing and cannot be used for real emergencies. Encrypted alert delivery, notifications and member acknowledgements remain unimplemented. See [Alert All requirements and acceptance criteria](Docs/ALERT_ALL.md).
 
+## Letterbox invitations
+
+The envelope button on Chats now opens Letterbox. Generate a one-use, expiring QR/code, scan or enter it, review it, and accept as a sample member. Member invitations add one sample contact and an empty local conversation. Group invitations are separate and require an existing approved member. Revocation, expiry and replay checks are implemented locally. **Preview codes work only in this session, not across devices.**
+
+A separate loopback-only Python admission service implements persistent, server-enforced invitation and membership rules, with tests for concurrent redemption, revocation and private contact/group access. It is not deployed or connected to the native preview and has no encrypted message transport. See [Letterbox implementation and integration limits](Docs/LETTERBOX.md). Real accounts, private cross-device chats and E2EE remain outstanding.
+
 ## Open and build
 
-Open `Letters.xcodeproj` in Xcode. Select the shared Letters scheme and an iPhone simulator, then Run. The preview targets iOS 16+. Physical-device installation needs an Apple account and a unique bundle identifier; this project deliberately has no signing team or credentials. No camera, microphone, contacts, or photo permissions are requested by the demo.
+Open `Letters.xcodeproj` in Xcode. Select the shared Letters scheme and an iPhone simulator, then Run. The preview targets iOS 16+. Physical-device installation needs an Apple account and a unique bundle identifier; this project deliberately has no signing team or credentials. Camera permission is requested only when you choose the Letterbox QR scanner. QR image import uses a file picker; no microphone, contacts or full photo-library permission is requested.
 
 This Mac was inspected on 21 October 2026: macOS 13.7.8, Swift 5.8.1 command-line tools, no full Xcode or iOS SDK. Native compilation cannot run locally here. The first GitHub-hosted unsigned iPhone simulator build and standalone checklist tests passed on 21 October 2026 using Xcode 16.4. The subsequent hosted iPhone simulator launch and screenshot capture also passed (run 39517134620). Interactive UI QA and device testing remain outstanding. Swift syntax parsing succeeds. The local checklist test attempt was blocked by the command-line-tools installation lacking the SDK PlatformPath; those tests subsequently passed on the hosted Mac.
 

@@ -18,6 +18,18 @@ Updated 21 October 2026. Checked items describe completed work, not security cer
 - [ ] Interactive accessibility, navigation, sticker import and small-screen QA.
 - [ ] Physical iPhone signing and distribution.
 
+## Letterbox invitations
+
+- [x] Native preview generation of QR and matching typed code, review/accept and revocation.
+- [x] Camera QR scanner with permission handling and local QR-image import.
+- [x] Separate member/contact admission and existing-member group invitations; empty new sample chats.
+- [x] Local-only admission service with persistent, atomic one-use redemption, session checks, private contacts and group authorization.
+- [x] Server invitation/security-boundary tests passed locally.
+- [ ] Verify this revision's hosted Swift tests, native build and Letterbox screenshot.
+- [ ] Deploy reviewed HTTPS service with production authentication and abuse controls.
+- [ ] Connect native invitations to live membership and verified encrypted direct/group rooms.
+- [ ] Cross-device scanning, malicious input, camera-denial, VoiceOver and cancellation QA.
+
 ## Free hosting — deferred while Osaka has no capacity
 
 - [x] Retry the approved Osaka ARM server configuration; Oracle rejected provisioning for lack of capacity.

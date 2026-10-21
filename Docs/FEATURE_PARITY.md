@@ -11,7 +11,7 @@ Baseline: WhatsApp consumer iPhone experience, reviewed 21 October 2026. All fea
 | Feature family | Required behavior | Current status |
 |---|---|---|
 | Identity and membership | Profiles, avatars, about, invite acceptance, expiring/revocable invitations, device sessions, account deletion | Planned; profile/invite explanations in preview |
-| Invitations | Server-enforced admission, single-use redemption, expiry, replay prevention, revocation and member removal | Planned |
+| Invitations | Server-enforced admission, single-use redemption, expiry, replay prevention, revocation and member removal | Native local QR/code flow plus separate loopback admission prototype and tests; live native/service/Matrix integration outstanding. See LETTERBOX.md |
 | Direct and group chat | Real-time messages, history, offline queue, retry, deduplication, ordering, groups and administration | Local sample preview only |
 | Chat organization | Search, unread, favorites, lists, groups, archive, pin, mute, mark unread | Search/unread/favorites/groups preview; remaining planned |
 | Delivery state | Queued/sent/delivered/read, typing, presence and last seen with privacy controls | Planned; preview does not fabricate delivery |
