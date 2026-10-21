@@ -282,12 +282,17 @@ struct LettersSettingsView: View {
                     Label("End-to-end encryption required", systemImage: "lock.shield")
                     Label("Device verification and recovery", systemImage: "key")
                 }
+                Section("Messaging development") {
+                    NavigationLink { MessagingFoundationView() } label: {
+                        Label("Encrypted messaging progress", systemImage: "lock.shield")
+                    }
+                }
                 Section("Current build") {
-                    Text("Design preview only. No live account, server, push notifications, calls, alerts, or cryptographic SDK is connected. Letterbox invitations are local previews.")
+                    Text("Design preview only. No live account, server, push notifications, calls, alerts, is connected to the preview. The Matrix encryption SDK is linked for separate development tests. Letterbox invitations are local previews.")
                     Text("Use sample content only. This build cannot send private messages.")
                 }
                 Section("Accessibility") {
-                    Text("Native Dynamic Type, VoiceOver labels, standard navigation, and no looping animations.")
+                    Text("Native Dynamic Type, VoiceOver labels, standard navigation, and Reduce Motion support for the orbital Home animation.")
                 }
             }.scrollContentBackground(.hidden).background(LettersTheme.background).navigationTitle("You")
         }

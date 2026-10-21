@@ -17,7 +17,7 @@ jobs:
   build:
     name: Check and build Letters
     runs-on: macos-15
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -35,6 +35,16 @@ jobs:
         env:
           LETTERS_CHECK_PUBLIC_FEEDS: "1"
         run: swift test --filter WorldNewsTests.testLiveFeedsWhenExplicitlyEnabled
+      - name: Prepare isolated encryption test runtime
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install pinned test homeserver
+        run: |
+          python -m venv "$RUNNER_TEMP/letters-synapse-venv"
+          "$RUNNER_TEMP/letters-synapse-venv/bin/python" -m pip install --disable-pip-version-check 'matrix-synapse==1.163.0'
+      - name: Verify real encrypted messaging and server boundaries
+        run: '"$RUNNER_TEMP/letters-synapse-venv/bin/python" scripts/test-encrypted-messaging.py'
       - name: Build unsigned iPhone simulator preview
         run: >-
           xcodebuild -project Letters.xcodeproj -scheme Letters
