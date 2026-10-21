@@ -6,6 +6,10 @@ An original, invite-only iPhone messenger targeting the agreed WhatsApp-style fe
 
 Letters is the app name. **Letters' Source Code** is this public portfolio project's title; the public GitHub repository is [Letters-Source-Code](https://github.com/abhi-sarnath-git/Letters-Source-Code).
 
+## Reading and debugging the code
+
+Source files now include comments explaining responsibilities, security guards and important blocks: `//` / `///` in Swift and `#` in Python, shell and workflow YAML. Start with the [code and debugging guide](Docs/CODE_GUIDE.md). Keep these explanations current when extending Letters; do not put secrets or private messages in debugging output.
+
 ## Portfolio screenshots
 
 [View Prototype Screenshots](Letters/Prototype%20Screenshots/README.md) for verified native captures of Chats, Alert All and Letterbox QR, including implementation status and build evidence. Screenshots will accompany completed feature milestones; previews are labelled accurately.
@@ -33,6 +37,10 @@ A separate loopback-only Python admission service implements persistent, server-
 ## Home news and orbital Earth
 
 Home now replaces the Letters word heading with an animated Earth/atom, alongside “Live Around The World.” Its menu selects World News, Global Stocks, Oil or Crypto headlines from The Guardian. Normal mode refreshes while Home is visible; screenshot mode uses a labelled sample. Source timestamps, unavailable/cached states, a pause control and Reduce Motion handling are included. This is news, not market quotes. See [implementation and verification limits](Docs/WORLD_PULSE.md).
+
+## Approved account connection
+
+A development Synapse authentication module now exchanges an approved Letterbox member's short-lived, one-use grant for a real SDK device session. Grant hashing, expiry, account binding, replay protection and current-membership checks are implemented. See [the admission bridge and remaining limits](Docs/MATRIX_ADMISSION.md). The native invitation and chat screens are still sample-only; server-enforced contact/group room policy and secure enrollment UX remain outstanding.
 
 ## Encrypted messaging development
 

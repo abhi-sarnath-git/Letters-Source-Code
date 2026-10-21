@@ -16,6 +16,10 @@ Five additional Python tests cover grant hashing, expiry, replay races, replacem
 
 Swift tests check credential validation and redacted debug output. The fixture contains synthetic credentials only, is created after SDK compilation so grants do not expire during builds, and is deleted rather than published. All source is annotated; see `CODE_GUIDE.md`.
 
+## Verified integration source
+
+Source [`89e430206b3ebd99109363e397bf7d0f6a65135d`](https://github.com/abhi-sarnath-git/Letters-Source-Code/commit/89e430206b3ebd99109363e397bf7d0f6a65135d), [hosted run 39679172969](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39679172969): the real auth-module boundary checks and all five Swift messaging tests passed on 22 October 2026. This includes independent-client decryption and raw-server ciphertext checks using approved Letterbox login grants. Fifteen Python admission tests passed separately. Synapse's pinned `Codes.EXPIRED_ACCOUNT` is used rather than guessing its error namespace. A later comment-only clarification does not change the tested logic.
+
 ## Outstanding before real use
 
 The preview invitation/composer UI is not connected to the HTTP admission service or SDK. Matrix room creation/invitation policy does not yet enforce personal contact edges or group administration against a modified client. Current access checks are point-in-time: no guarantee covers cancellation of in-flight requests, key recovery, removing previously decrypted history or a malicious homeserver. Do not deploy this development module or enable live user UI before review, room-policy integration, TLS/abuse controls, device verification/recovery and physical-device tests.

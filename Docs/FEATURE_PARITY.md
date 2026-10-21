@@ -10,7 +10,7 @@ Baseline: WhatsApp consumer iPhone experience, reviewed 21 October 2026. All fea
 
 | Feature family | Required behavior | Current status |
 |---|---|---|
-| Identity and membership | Profiles, avatars, about, invite acceptance, expiring/revocable invitations, device sessions, account deletion | Planned; profile/invite explanations in preview |
+| Identity and membership | Profiles, avatars, about, invite acceptance, expiring/revocable invitations, device sessions, account deletion | Local preview plus a development Letterbox-to-Matrix device-login bridge; native account UI, recovery, deletion and full session revocation remain outstanding |
 | Invitations | Server-enforced admission, single-use redemption, expiry, replay prevention, revocation and member removal | Native local QR/code flow plus separate loopback admission prototype and tests; live native/service/Matrix integration outstanding. See LETTERBOX.md |
 | Direct and group chat | Real-time messages, history, offline queue, retry, deduplication, ordering, groups and administration | Local sample preview; separate Matrix encrypted-text development client, not yet connected to live UI |
 | Chat organization | Search, unread, favorites, lists, groups, archive, pin, mute, mark unread | Search/unread/favorites/groups preview; remaining planned |

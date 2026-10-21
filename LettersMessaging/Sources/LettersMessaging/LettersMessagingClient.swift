@@ -13,8 +13,8 @@ public enum LettersMessagingFoundation {
     public static let sdkRelease = "26.10.02"
 }
 
-/// Development messaging boundary. Not connected to the portfolio composer or
-/// Letterbox admission yet; callers cannot treat Matrix membership as approval.
+/// Development messaging boundary; the portfolio composer is still disconnected.
+/// Letterbox grants authorize device login, not personal contact/group membership.
 public actor LettersMessagingClient {
     private let endpoint: URL
     private let root: URL

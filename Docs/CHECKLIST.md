@@ -1,6 +1,6 @@
 # Letters project checklist
 
-Updated 21 October 2026. Checked items describe completed work, not security certification.
+Updated 22 October 2026. Checked items describe completed work, not security certification.
 
 ## Portfolio foundation
 
@@ -57,7 +57,10 @@ No paid upgrade, scheduled retry, running server or working messaging service is
 - [x] Verify plaintext/audience guards, plaintext-invitation departure and device-preserving session restore in isolated Synapse.
 - [x] Compile the native iPhone simulator app with the pinned SDK linked.
 - [ ] Verify real iPhone Keychain/locked-device/reinstall behavior and independent physical devices.
-- [ ] Finish contact verification, recovery, native account/chat integration and security review.
+- [x] Annotate source responsibilities, security guards and important logic; add CODE_GUIDE.md.
+- [x] Implement one-use Letterbox login grants and development Synapse authentication/account-validity callbacks.
+- [x] Verify the new admission-to-SDK bridge, real device-session login, replay/expiry/account binding, removed-member sync denial and encrypted exchange in hosted tests (run 39679172969).
+- [ ] Finish server-enforced contact/group room policy, verification, recovery, native account/chat integration and security review.
 - [ ] Invite-only account creation, removal and session revocation.
 - [ ] Encrypted rooms/media, secure key storage, device verification and recovery.
 - [ ] Prove encrypted delivery between two independent devices with no plaintext fallback.

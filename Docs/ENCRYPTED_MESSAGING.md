@@ -4,7 +4,7 @@ The native preview now links a separate `LettersMessaging` package using the Mat
 
 ## Implemented boundary
 
-- Password sign-in, session restoration and explicit server logout through the SDK. Passwords are not retained.
+- Password-flow sign-in (including one-use Letterbox login grants), session restoration and explicit server logout through the SDK. Passwords are not retained.
 - One atomic Keychain record contains the access/refresh session and a random 32-byte SDK SQLite store key. Items are nonsynchronizing and accessible only when unlocked on this device. SDK directories are excluded from backup, owner-only, and receive complete file protection on iOS.
 - Production configuration requires a bare HTTPS server URL, rejects embedded credentials/query/fragment/path, disables well-known server discovery and retains TLS verification. Only an internal test initializer accepts IPv4 loopback HTTP.
 - Cross-signing is enabled; key sharing uses the SDK's identity-based strategy, with cross-signed sender devices required for decryption. Automatic server backups are disabled pending recovery UX. Cross-signing is **not** proof of a person's identity or a substitute for contact verification.
@@ -13,11 +13,11 @@ The native preview now links a separate `LettersMessaging` package using the Mat
 - JSON encoding handles message text, limited to 16 KB. A successful send returns the actual server event ID. This means server acceptance, **not** delivery, decryption, reading, or a human acknowledgement.
 - SDK operations are serialized across actor suspension points. Local close preserves the session; logout revokes it before deleting local credentials. Logout failure retains credentials to retry revocation. Encrypted store files remain pending the deletion/recovery design.
 
-E2EE protects message text; the homeserver still sees metadata such as room names, membership and event timing. The recipient check is a point-in-time defense, not atomic server authorization. Matrix membership alone does not prove Letters approval. The admission service must ultimately control account provisioning, contact authorization, room membership and removal. No live client should be enabled before that bridge and device verification exist.
+E2EE protects message text; the homeserver still sees metadata such as room names, membership and event timing. The recipient check is a point-in-time defense, not atomic server authorization. Room membership alone does not authorize a personal contact edge or group admission. The development auth module now checks approved account membership for device login and normal session requests; room-specific enforcement remains outstanding. The admission service must ultimately control account provisioning, contact authorization, room membership and removal. No live client should be enabled before that bridge and device verification exist.
 
 ## Integration test
 
-`scripts/test-encrypted-messaging.py` starts pinned Synapse **1.163.0** on a kernel-selected `127.0.0.1` port inside an ephemeral directory. Public registration is disabled, only client HTTP resources are exposed, and federation is restricted. An ephemeral registration secret provisions three synthetic test users. No live account or Oracle resources are used.
+`scripts/test-encrypted-messaging.py` starts pinned Synapse **1.163.0** on a kernel-selected `127.0.0.1` port inside an ephemeral directory. Public registration is disabled, only client HTTP resources are exposed, and federation is restricted. The development Letterbox auth module provisions approved synthetic members through one-use login grants. Normal password-database authentication is disabled, and the actual module checks expiry, replay, account binding and removal. See [the admission bridge](MATRIX_ADMISSION.md). No live account or Oracle resources are used.
 
 The Swift integration test signs in independent clients and checks:
 
@@ -34,6 +34,8 @@ Run using Python 3.12 in a private virtual environment with `matrix-synapse==1.1
 ## Verified source
 
 Source [`4eaf24821dae85f11bb324fef496acf697008f31`](https://github.com/abhi-sarnath-git/Letters-Source-Code/commit/4eaf24821dae85f11bb324fef496acf697008f31), [hosted run 39560168763](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39560168763): all four messaging tests, existing admission/core/news checks and native iPhone simulator compilation passed on 21 October 2026. The integration test was enabled, not skipped. The two SDK clients used different accounts, device identities and persistent stores in one Mac test process. This is not a physical-device or interactive chat test.
+
+The next admission milestone is verified in [run 39679172969](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39679172969): the real Synapse auth module accepts only approved one-use grants, removal blocks normal session access, and all five current Swift tests passed, including encrypted exchange. See [MATRIX_ADMISSION.md](MATRIX_ADMISSION.md) for source provenance and limits. The earlier source/run above remains the evidence for the original SDK milestone.
 
 ## Remaining release gates
 
