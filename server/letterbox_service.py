@@ -27,6 +27,7 @@ def digest(value):
     return hashlib.sha256(value.encode('ascii')).hexdigest()
 
 
+# Canonical formatting is allowed; arbitrary URLs and malformed invite payloads are rejected.
 def normalized_code(value):
     if not isinstance(value, str) or len(value) > 128:
         raise Denied('Invitation unavailable')
@@ -46,8 +47,12 @@ def display_name(value):
 
 
 class LetterboxService:
-    def __init__(self, path, clock=time.time):
+    def __init__(self, path, clock=time.time, matrix_server_name=None):
         self.path, self.clock = str(path), clock
+        # The trusted deployment chooses the Matrix domain, never an HTTP caller.
+        if matrix_server_name is not None and not re.fullmatch(r'[a-z0-9][a-z0-9.-]*(?::[0-9]{1,5})?', matrix_server_name):
+            raise ValueError('Invalid Matrix server name')
+        self.matrix_server_name = matrix_server_name
         with self.db() as c:
             c.executescript('''
             CREATE TABLE IF NOT EXISTS members(id TEXT PRIMARY KEY, name TEXT NOT NULL, active INTEGER NOT NULL, owner INTEGER NOT NULL DEFAULT 0);
@@ -57,8 +62,11 @@ class LetterboxService:
             CREATE TABLE IF NOT EXISTS contacts(a TEXT REFERENCES members(id), b TEXT REFERENCES members(id), PRIMARY KEY(a,b));
             CREATE TABLE IF NOT EXISTS invitations(id TEXT PRIMARY KEY, hash TEXT UNIQUE NOT NULL, issuer TEXT NOT NULL REFERENCES members(id), group_id TEXT REFERENCES groups(id), expires REAL NOT NULL, revoked INTEGER NOT NULL DEFAULT 0, used_by TEXT REFERENCES members(id));
             CREATE TABLE IF NOT EXISTS direct_rooms(id TEXT PRIMARY KEY, a TEXT, b TEXT, UNIQUE(a,b));
+            CREATE TABLE IF NOT EXISTS matrix_login_grants(hash TEXT PRIMARY KEY, member TEXT NOT NULL REFERENCES members(id), session_hash TEXT NOT NULL REFERENCES sessions(hash) ON DELETE CASCADE, user_id TEXT NOT NULL, issued REAL NOT NULL, expires REAL NOT NULL, used INTEGER NOT NULL DEFAULT 0);
+            CREATE INDEX IF NOT EXISTS matrix_grant_member ON matrix_login_grants(member,issued);
             ''')
 
+    # One immediate transaction protects invitation redemption and login grants from replay races.
     @contextmanager
     def db(self):
         c = sqlite3.connect(self.path, timeout=10)
@@ -74,11 +82,13 @@ class LetterboxService:
         finally:
             c.close()
 
+    # Session secrets leave the server once; SQLite stores their hashes, never bearer credentials.
     def _session(self, c, member):
         token = secrets.token_urlsafe(32)
         c.execute('INSERT INTO sessions VALUES(?,?,?)', (digest(token), member, self.clock() + 30*86400))
         return token
 
+    # Every privileged operation checks both session expiry and current active membership.
     def _auth(self, c, token):
         if not isinstance(token, str) or not 32 <= len(token) <= 128 or not token.isascii():
             raise Denied('Authentication required')
@@ -112,6 +122,7 @@ class LetterboxService:
             c.execute('INSERT INTO invitations(id,hash,issuer,group_id,expires) VALUES(?,?,?,?,?)', (invite_id,digest(code),issuer,group_id,expires))
             return {'id': invite_id, 'code': code, 'group_id': group_id, 'expires_at': expires}
 
+    # Admission creates only the inviter/recipient contact edge; group membership requires its own invitation.
     def redeem(self, code, name=None, token=None):
         code = normalized_code(code)
         with self.db() as c:
@@ -157,6 +168,7 @@ class LetterboxService:
             member = self._auth(c,token)['id']
             return [dict(r) for r in c.execute('SELECT m.id,m.name FROM contacts x JOIN members m ON m.id=CASE WHEN x.a=? THEN x.b ELSE x.a END WHERE (x.a=? OR x.b=?) AND m.active=1', (member,member,member))]
 
+    # A direct-room placeholder requires an existing personal contact. It is not a live Matrix room.
     def direct(self, token, other):
         with self.db() as c:
             member = self._auth(c,token)['id']
@@ -184,6 +196,63 @@ class LetterboxService:
                 raise Denied('Group unavailable')
             return dict(row, messaging_available=False)
 
+    def matrix_user_id(self, member_id):
+        """Map an admission UUID to one stable local Matrix identity, not a name."""
+        if self.matrix_server_name is None:
+            raise Denied('Messaging connection unavailable')
+        return '@letters_' + uuid.UUID(member_id).hex + ':' + self.matrix_server_name
+
+    def issue_matrix_login(self, token):
+        """Return a 60-second sign-in grant once; persist only its SHA-256 hash."""
+        if self.matrix_server_name is None:
+            raise Denied('Messaging connection unavailable')
+        with self.db() as c:
+            member = self._auth(c, token)['id']
+            now = self.clock()
+            # Bound table growth and credential churn; never log returned grants.
+            c.execute('DELETE FROM matrix_login_grants WHERE expires<=?', (now-3600,))
+            recent = c.execute('SELECT count(*) FROM matrix_login_grants WHERE member=? AND issued>?', (member, now-3600)).fetchone()[0]
+            if recent >= 10:
+                raise Denied('Sign-in limit reached; try later')
+            # A fresh request replaces this member's unused credential. Existing
+            # Matrix device sessions are unaffected and require separate policy.
+            c.execute('UPDATE matrix_login_grants SET used=1 WHERE member=?', (member,))
+            grant = 'LLOGIN-' + secrets.token_urlsafe(32)
+            user_id = self.matrix_user_id(member)
+            c.execute('INSERT INTO matrix_login_grants VALUES(?,?,?,?,?,?,0)',
+                      (digest(grant), member, digest(token), user_id, now, now+60))
+            return {'user_id': user_id, 'login_grant': grant, 'expires_at': now+60}
+
+    def consume_matrix_login(self, user_id, grant):
+        """Atomically bind an unused grant to its approved account and session."""
+        if not isinstance(user_id, str) or not isinstance(grant, str) or not re.fullmatch(r'LLOGIN-[A-Za-z0-9_-]{43}', grant):
+            raise Denied('Sign-in unavailable')
+        with self.db() as c:
+            # BEGIN IMMEDIATE in db() makes concurrent replays compete for one
+            # write transaction. Account, admission session and expiry all matter.
+            row = c.execute('''SELECT m.id,m.name FROM matrix_login_grants g
+                JOIN members m ON m.id=g.member JOIN sessions s ON s.hash=g.session_hash
+                WHERE g.hash=? AND g.user_id=? AND g.used=0 AND g.expires>?
+                AND s.expires>? AND m.active=1''',
+                (digest(grant), user_id, self.clock(), self.clock())).fetchone()
+            if row is None or self.matrix_user_id(row['id']) != user_id:
+                raise Denied('Sign-in unavailable')
+            c.execute('UPDATE matrix_login_grants SET used=1 WHERE hash=?', (digest(grant),))
+            return dict(row)
+
+    def matrix_account_active(self, user_id):
+        """Recheck membership for existing Matrix sessions; do not cache approval."""
+        if not isinstance(user_id, str) or self.matrix_server_name is None:
+            return False
+        pattern = r'@letters_([0-9a-f]{32}):' + re.escape(self.matrix_server_name)
+        match = re.fullmatch(pattern, user_id)
+        if match is None:
+            return False
+        with self.db() as c:
+            row = c.execute('SELECT active FROM members WHERE id=?', (str(uuid.UUID(hex=match[1])),)).fetchone()
+            return row is not None and row['active'] == 1
+
+    # Removing a member revokes admission sessions/grants and blocks future Synapse requests via the module.
     def deactivate(self, token, member_id):
         with self.db() as c:
             actor = self._auth(c,token)
@@ -214,7 +283,9 @@ def handler(service):
                     raise Denied('Invalid JSON object')
                 auth = self.headers.get('Authorization','')
                 token = auth[7:] if auth.startswith('Bearer ') else None
+                # Dispatch only named operations; caller-provided IDs are re-authorized by each method.
                 routes = {
+                    '/v1/messaging/login-grant':lambda:service.issue_matrix_login(token),
                     '/v1/invitations':lambda:service.issue(token,data.get('group_id'),data.get('ttl',86400)),
                     '/v1/redeem':lambda:service.redeem(data.get('code'),data.get('name'),token),
                     '/v1/revoke':lambda:service.revoke(token,data.get('invitation_id')),
@@ -248,11 +319,12 @@ def main():
     parser.add_argument('--data-dir',required=True,help='Private directory outside the public source')
     parser.add_argument('--init',action='store_true')
     parser.add_argument('--port',type=int,default=8808)
+    parser.add_argument('--matrix-server-name',help='Trusted local Matrix domain; development bridge only')
     args=parser.parse_args()
     os.umask(0o077)
     folder=Path(args.data_dir).expanduser().resolve()
     folder.mkdir(parents=True,exist_ok=True,mode=0o700)
-    service=LetterboxService(folder/'letterbox.sqlite3')
+    service=LetterboxService(folder/'letterbox.sqlite3',matrix_server_name=args.matrix_server_name)
     if args.init:
         # Create private output before bootstrapping, so an existing credential cannot be overwritten.
         with (folder/'owner-session.json').open('x') as out:

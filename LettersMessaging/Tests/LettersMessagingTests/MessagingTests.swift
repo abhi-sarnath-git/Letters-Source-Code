@@ -24,6 +24,23 @@ final class MessagingTests: XCTestCase {
         XCTAssertNoThrow(try LettersMessagingClient.validateServer(URL(string: "https://letters.example:8448")!))
     }
 
+    func testLoginGrantExpiryValidationAndRedactedDebugOutput() throws {
+        let now = Date(timeIntervalSince1970: 1000)
+        func decode(expiry: Double, secret: String) throws -> LetterboxLoginGrant {
+            let json: [String: Any] = ["user_id": "@letters_" + String(repeating: "a", count: 32) + ":letters.test",
+                                       "login_grant": secret, "expires_at": expiry]
+            return try JSONDecoder().decode(LetterboxLoginGrant.self, from: JSONSerialization.data(withJSONObject: json))
+        }
+        let secret = "LLOGIN-" + String(repeating: "a", count: 43)
+        let good = try decode(expiry: 1060, secret: secret)
+        XCTAssertNoThrow(try good.validate(now: now))
+        XCTAssertFalse(String(describing: good).contains(secret))
+        XCTAssertFalse(String(reflecting: good).contains(secret))
+        XCTAssertThrowsError(try decode(expiry: 1000, secret: secret).validate(now: now))
+        XCTAssertThrowsError(try decode(expiry: 1300, secret: secret).validate(now: now))
+        XCTAssertThrowsError(try decode(expiry: 1060, secret: "bad").validate(now: now))
+    }
+
     func testFreshStoreKeysAreIndependentAndCredentialsAreNotPasswords() throws {
         let first = try StoredSession.fresh(), second = try StoredSession.fresh()
         XCTAssertEqual(first.storeKey.count, 32)
@@ -50,7 +67,7 @@ final class MessagingTests: XCTestCase {
         guard let path = ProcessInfo.processInfo.environment["LETTERS_MATRIX_TEST_FIXTURE"] else {
             throw XCTSkip("Run scripts/test-encrypted-messaging.py for the isolated integration test")
         }
-        struct Fixture: Decodable { let base: String; let accounts: [String: String]; let stores: String }
+        struct Fixture: Decodable { let base: String; let grants: [String: LetterboxLoginGrant]; let stores: String }
         let fixture = try JSONDecoder().decode(Fixture.self, from: Data(contentsOf: URL(fileURLWithPath: path)))
         let base = URL(string: fixture.base)!
         let aliceVault = MemoryVault(), bobVault = MemoryVault(), outsiderVault = MemoryVault()
@@ -60,9 +77,9 @@ final class MessagingTests: XCTestCase {
         }
         let alice = try make("alice", aliceVault), bob = try make("bob", bobVault)
         let outsider = try make("outsider", outsiderVault)
-        try await alice.signIn(username: "alice", password: XCTUnwrap(fixture.accounts["alice"]))
-        try await bob.signIn(username: "bob", password: XCTUnwrap(fixture.accounts["bob"]))
-        try await outsider.signIn(username: "outsider", password: XCTUnwrap(fixture.accounts["outsider"]))
+        try await alice.signIn(using: XCTUnwrap(fixture.grants["alice"]))
+        try await bob.signIn(using: XCTUnwrap(fixture.grants["bob"]))
+        try await outsider.signIn(using: XCTUnwrap(fixture.grants["outsider"]))
         let aliceID = try await alice.userID(), bobID = try await bob.userID()
         let originalDevice = try await alice.deviceID()
         for _ in 0..<3 { try await alice.syncOnce(); try await bob.syncOnce() }

@@ -1,3 +1,5 @@
+// Voice-call preparation for fictional contacts. No microphone capture, ringing or media transport is started here.
+
 import SwiftUI
 
 enum CallKind: String, CaseIterable {

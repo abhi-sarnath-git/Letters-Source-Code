@@ -1,3 +1,5 @@
+// Release checklist bookkeeping only. These flags do not enable encryption or authorize a real user.
+
 import Foundation
 
 /// Release evidence, not a cryptographic implementation or runtime authorization check.

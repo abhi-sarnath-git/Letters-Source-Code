@@ -1,3 +1,5 @@
+// Pure local invitation/contact model for UI demonstrations. Preview QR codes never authorize a Matrix account.
+
 import Foundation
 
 public enum LetterboxError: Error, LocalizedError, Equatable {

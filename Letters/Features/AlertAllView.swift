@@ -1,3 +1,5 @@
+// Emergency-alert rehearsal only. Confirmation and ending a rehearsal change local state; nobody is notified.
+
 import SwiftUI
 
 struct AlertAllView: View {

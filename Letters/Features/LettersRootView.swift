@@ -1,3 +1,5 @@
+// Main navigation and sample conversations. This composer changes PreviewStore only; it does not send messages.
+
 import SwiftUI
 
 struct LettersRootView: View {
@@ -145,6 +147,7 @@ struct ConversationListView: View {
             }
         }
     }
+    // Let the native menu dismiss before changing tabs to avoid competing transitions.
     private func navigate(to tab: Int) {
         // Allow the system menu to begin dismissing before changing destinations.
         DispatchQueue.main.async { selectedTab = tab }
@@ -155,6 +158,7 @@ struct ConversationListView: View {
 
 }
 
+// Sample chat interaction only; do not route real credentials or messages through this view yet.
 struct ChatPreviewView: View {
     let conversationID: String
     @EnvironmentObject private var store: PreviewStore

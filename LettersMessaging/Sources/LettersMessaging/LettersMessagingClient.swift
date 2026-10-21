@@ -1,3 +1,5 @@
+// SDK adapter for sessions and encrypted text. Security checks fail closed; the portfolio composer is not wired here yet.
+
 import Foundation
 import MatrixRustSDK
 
@@ -20,6 +22,7 @@ public actor LettersMessagingClient {
     private var client: Client?
     private var sessionDelegate: SessionDelegate?
     private var operationInProgress = false
+    // Actors can re-enter at await. This gate keeps logout, sync and send from overlapping.
     private func beginOperation() throws {
         guard !operationInProgress else { throw MessagingError.operationInProgress }
         operationInProgress = true
@@ -64,6 +67,7 @@ public actor LettersMessagingClient {
                                                    ofItemAtPath: directory.path)
             #endif
         }
+        // Keep the SDK store key separate from files and use cross-signed-device crypto policy.
         let delegate = SessionDelegate(vault: vault)
         let sdk = try await ClientBuilder()
             .homeserverUrl(url: endpoint.absoluteString)
@@ -84,6 +88,18 @@ public actor LettersMessagingClient {
 
     public func signIn(username: String, password: String) async throws {
         try beginOperation(); defer { endOperation() }
+        try await performSignIn(username: username, password: password)
+    }
+
+    /// Exchange an approved member's one-use Letterbox grant for a real device.
+    /// The configured homeserver is never taken from the invitation or payload.
+    public func signIn(using grant: LetterboxLoginGrant) async throws {
+        try beginOperation(); defer { endOperation() }
+        try grant.validate()
+        try await performSignIn(username: grant.userID, password: grant.secret, expectedUserID: grant.userID)
+    }
+
+    private func performSignIn(username: String, password: String, expectedUserID: String? = nil) async throws {
         guard client == nil, try vault.load()?.credentials == nil else { throw MessagingError.alreadySignedIn }
         guard !username.isEmpty, !password.isEmpty else { throw MessagingError.invalidSession }
         let record = try StoredSession.fresh()
@@ -91,6 +107,8 @@ public actor LettersMessagingClient {
         let sdk = try await build(record)
         do {
             try await sdk.login(username: username, password: password, initialDeviceName: "Letters", deviceId: nil)
+            // Refuse account substitution before exposing the authenticated client.
+            if let expectedUserID, try sdk.userId() != expectedUserID { throw MessagingError.invalidSession }
             sessionDelegate?.saveSessionInKeychain(session: try sdk.session())
             try sessionDelegate?.check()
             await sdk.encryption().waitForE2eeInitializationTasks()
@@ -104,6 +122,7 @@ public actor LettersMessagingClient {
         }
     }
 
+    /// Restore the same device and encrypted store; never generate a replacement identity here.
     public func restore() async throws {
         try beginOperation(); defer { endOperation() }
         guard client == nil else { throw MessagingError.alreadySignedIn }
@@ -176,6 +195,7 @@ public actor LettersMessagingClient {
         }
     }
 
+    // Refresh encryption and audience before content access. This is a snapshot, not server-side contact authorization.
     private func guardedRoom(_ roomID: String, recipients: Set<String>) async throws -> Room {
         let sdk = try authenticated()
         try await requireCrypto(sdk)
@@ -198,6 +218,7 @@ public actor LettersMessagingClient {
             throw MessagingError.invalidMessage
         }
         let room = try await guardedRoom(roomID, recipients: recipients)
+        // JSON encoding escapes arbitrary text; the SDK encrypts the resulting room message.
         let json = try JSONSerialization.data(withJSONObject: ["msgtype": "m.text", "body": text])
         return try await room.sendRaw(eventType: "m.room.message", content: String(decoding: json, as: UTF8.self))
     }

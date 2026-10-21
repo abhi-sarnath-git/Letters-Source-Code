@@ -1,3 +1,5 @@
+// Honest implementation-status screen. SDK linkage and test evidence are distinct from working private chats.
+
 import SwiftUI
 import LettersMessaging
 

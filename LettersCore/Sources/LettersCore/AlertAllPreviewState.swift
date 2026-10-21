@@ -1,3 +1,5 @@
+// Deterministic rehearsal lifecycle: enforce note limits and at most one active local alert.
+
 import Foundation
 
 /// Local rehearsal state only. Never represents delivery, encryption or a real recipient.

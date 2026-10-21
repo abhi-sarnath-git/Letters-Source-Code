@@ -1,3 +1,5 @@
+// Bounded public RSS loading/parsing. Provider links are validated and external XML entities are disabled.
+
 import Foundation
 #if canImport(FoundationXML)
 import FoundationXML

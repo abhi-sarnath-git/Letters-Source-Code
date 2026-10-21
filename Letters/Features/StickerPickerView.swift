@@ -1,3 +1,5 @@
+// Session-local sticker selection/import. Image limits protect memory; encrypted delivery and persistent packs are not connected.
+
 import SwiftUI
 import UniformTypeIdentifiers
 import ImageIO

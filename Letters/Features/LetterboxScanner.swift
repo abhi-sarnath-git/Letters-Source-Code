@@ -1,3 +1,5 @@
+// Camera-to-QR bridge. Permission is explicit, capture stops on dismissal/background, and frames are not uploaded.
+
 import SwiftUI
 import AVFoundation
 import UIKit
@@ -74,6 +76,7 @@ final class ScannerController: UIViewController, AVCaptureMetadataOutputObjectsD
         message.text = "Camera unavailable or permission denied. Close this scanner to enter a code or choose a QR image. You can allow camera access in iPhone Settings."
     }
 
+    // Configure capture on its dedicated queue so camera setup does not block UI interactions.
     private func configure() {
         guard session.inputs.isEmpty else { return }
         guard let camera = AVCaptureDevice.default(for: .video), let input = try? AVCaptureDeviceInput(device: camera),
@@ -94,6 +97,7 @@ final class ScannerController: UIViewController, AVCaptureMetadataOutputObjectsD
         queue.async { [session] in session.startRunning() }
     }
 
+    // Accept one QR result per presentation; repeated camera frames must not redeem it repeatedly.
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput objects: [AVMetadataObject], from connection: AVCaptureConnection) {
         guard visible, !consumed, let payload = (objects.first as? AVMetadataMachineReadableCodeObject)?.stringValue else { return }
         consumed = true; stop(); scanned?(payload)

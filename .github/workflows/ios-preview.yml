@@ -13,6 +13,7 @@ concurrency:
   group: letters-preview-${{ github.ref }}
   cancel-in-progress: true
 
+# Run admission, SDK integration and native UI checks separately so failures identify the boundary.
 jobs:
   build:
     name: Check and build Letters
@@ -43,6 +44,7 @@ jobs:
         run: |
           python -m venv "$RUNNER_TEMP/letters-synapse-venv"
           "$RUNNER_TEMP/letters-synapse-venv/bin/python" -m pip install --disable-pip-version-check 'matrix-synapse==1.163.0'
+      # The harness uses synthetic accounts on loopback; secrets/databases are never artifacts.
       - name: Verify real encrypted messaging and server boundaries
         run: '"$RUNNER_TEMP/letters-synapse-venv/bin/python" scripts/test-encrypted-messaging.py'
       - name: Build unsigned iPhone simulator preview
@@ -56,6 +58,7 @@ jobs:
         run: bash scripts/capture-preview.sh
       - name: Package downloadable simulator preview
         run: bash scripts/package-simulator.sh
+      # These are unsigned simulator files, not an installable iPhone release.
       - name: Save simulator download
         uses: actions/upload-artifact@v7
         with:

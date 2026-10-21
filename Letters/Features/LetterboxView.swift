@@ -1,3 +1,5 @@
+// Local invitation UI: generate/review demo codes and decode QR images on device. Live admission is a separate server boundary.
+
 import SwiftUI
 import CoreImage.CIFilterBuiltins
 import Security
@@ -233,6 +235,7 @@ struct LetterboxView: View {
         }.presentationDetents([.medium, .large])
     }
 
+    // Inspect first so the user sees the inviter/group before accepting a demo invitation.
     private func review() {
         editing = false
         do {
@@ -258,6 +261,7 @@ struct LetterboxView: View {
         } catch { self.error = error.localizedDescription }
     }
 
+    // Encode the same invitation payload shown as text; QR is a carrier, not authorization itself.
     private func qrImage(_ payload: String) -> UIImage? {
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(payload.utf8)
@@ -267,6 +271,7 @@ struct LetterboxView: View {
         return UIImage(cgImage: image)
     }
 
+    // Decode imported images locally with Vision; a scanned string still needs invitation validation.
     private func readQRImage(_ url: URL) {
         let access = url.startAccessingSecurityScopedResource()
         defer { if access { url.stopAccessingSecurityScopedResource() } }

@@ -1,3 +1,5 @@
+// Public-news cache, foreground refresh and orbital animation. News networking never receives chat credentials.
+
 import SwiftUI
 
 @MainActor final class WorldPulseStore: ObservableObject {
@@ -7,6 +9,7 @@ import SwiftUI
     @Published private(set) var loading = false
     private var lastAttempts: [WorldNewsCategory: Date] = [:]
 
+    // Limit requests per topic while retaining old headlines for an honest cached/offline state.
     func refresh(_ category: WorldNewsCategory) async {
         if let last = lastAttempts[category], Date().timeIntervalSince(last) < WorldNewsFeed.refreshInterval { return }
         lastAttempts[category] = Date()
@@ -136,6 +139,7 @@ struct WorldPulseView: View {
     }
 }
 
+// Timeline animation belongs to the visible UI; callers disable it for pause and Reduce Motion.
 struct OrbitalEarth: View {
     let active: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion

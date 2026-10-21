@@ -1,3 +1,5 @@
+// Secure session persistence and SDK callbacks. Never print tokens, store keys or serialized records while debugging.
+
 import Foundation
 import Security
 import MatrixRustSDK
@@ -80,6 +82,7 @@ final class KeychainSessionVault: SessionVault, @unchecked Sendable {
         } catch { throw MessagingError.secureStorageUnavailable }
     }
 
+    // Update one Keychain item atomically; device-only/unlocked access excludes cloud sync.
     func save(_ record: StoredSession) throws {
         lock.lock(); defer { lock.unlock() }
         let data = try JSONEncoder().encode(record)

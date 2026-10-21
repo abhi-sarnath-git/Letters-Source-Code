@@ -1,3 +1,5 @@
+// Shared colours and reusable artwork. The envelope is branding; a lock icon is not encryption evidence.
+
 import SwiftUI
 
 enum LettersTheme {

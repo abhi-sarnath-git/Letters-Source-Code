@@ -1,3 +1,5 @@
+// Fictional, in-memory UI state. Per-profile caches demonstrate independent contact lists, not real account isolation.
+
 import SwiftUI
 
 struct PreviewMessage: Identifiable {
@@ -50,6 +52,7 @@ struct PreviewConversation: Identifiable {
               ])
     ]
 
+    // Save the outgoing sample conversation state before loading another profile's separate contact view.
     func switchLetterboxProfile(_ id: String) {
         savedProfiles[letterbox.activeMemberID] = conversations
         do { try letterbox.selectProfile(id) } catch { return }
@@ -77,6 +80,7 @@ struct PreviewConversation: Identifiable {
         return member
     }
 
+    // Append a fictional local message only; no network send or delivery claim occurs.
     func appendPreview(_ text: String, to id: String) {
         let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty, let index = conversations.firstIndex(where: { $0.id == id }) else { return }
