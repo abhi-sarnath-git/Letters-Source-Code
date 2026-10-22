@@ -85,3 +85,9 @@ for market_topic in oil bitcoin; do
   sleep 4
   xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-market-$market_topic-sample.png"
 done
+
+# No server, credentials or conversation data are injected into this UI capture.
+xcrun simctl terminate "$preview_device" com.example.letters || true
+xcrun simctl launch "$preview_device" com.example.letters --preview-world-pulse --preview-development-chat
+sleep 3
+xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-development-chat.png"

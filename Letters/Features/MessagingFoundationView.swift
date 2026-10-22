@@ -9,7 +9,7 @@ struct MessagingFoundationView: View {
             Section {
                 Label("Messaging is being built", systemImage: "lock.shield")
                     .font(.headline).foregroundStyle(LettersTheme.accent)
-                Text("The sample chats cannot send private messages. Keep using fictional content in this preview.")
+                Text("The sample chats stay local. Debug builds offer a separate encrypted development chat with synthetic accounts on a trusted test server; it is not ready for family use.")
             }
             Section("Encryption foundation") {
                 LabeledContent("Matrix SDK", value: LettersMessagingFoundation.sdkRelease)
@@ -19,7 +19,7 @@ struct MessagingFoundationView: View {
             Section("Before private chats are available") {
                 Label("Connect Letterbox invitations to real accounts", systemImage: "envelope.open")
                 Label("Add device verification and recovery", systemImage: "key")
-                Label("Connect live chats and encrypted attachments", systemImage: "bubble.left.and.bubble.right")
+                Label("Complete native chat UX and physical-device testing", systemImage: "bubble.left.and.bubble.right")
                 Label("Verify notifications and offline behaviour", systemImage: "bell")
             }
             Section("Separate features still needed") {

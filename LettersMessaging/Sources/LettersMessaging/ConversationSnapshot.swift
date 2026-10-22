@@ -39,6 +39,16 @@ final class ConversationSnapshot: TimelineListener, @unchecked Sendable {
         }
     }
 
+    // Human verification is explicitly unfinished in this development screen.
+    // Other trust warnings, including plaintext injected into an encrypted room,
+    // must never be presented as an encrypted conversation message.
+    static func permitsDevelopmentDisplay(_ shield: ShieldState) -> Bool {
+        switch shield {
+        case .none: return true
+        case .red(let code), .grey(let code): return code == .unverifiedIdentity
+        }
+    }
+
     func events() throws -> [EventTimelineItem] {
         lock.lock(); defer { lock.unlock() }
         guard valid else { throw MessagingError.invalidSession }

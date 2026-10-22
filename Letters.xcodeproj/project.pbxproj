@@ -63,7 +63,7 @@
         GENERATE_INFOPLIST_FILE = YES;
         INFOPLIST_KEY_CFBundleDisplayName = Letters;
         INFOPLIST_KEY_NSCameraUsageDescription = "Scan a Letterbox invitation QR code. Frames stay on your device.";
-        INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record a voice note when you choose Record. This preview does not upload it.";
+        INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record a voice note for review. An upload starts only when you choose Send in the encrypted development chat.";
         INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID to demonstrate local biometric access. Account passkeys require a configured service.";
         INFOPLIST_KEY_UILaunchScreen_Generation = YES;
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -79,7 +79,7 @@
         GENERATE_INFOPLIST_FILE = YES;
         INFOPLIST_KEY_CFBundleDisplayName = Letters;
         INFOPLIST_KEY_NSCameraUsageDescription = "Scan a Letterbox invitation QR code. Frames stay on your device.";
-        INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record a voice note when you choose Record. This preview does not upload it.";
+        INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record a voice note for review. An upload starts only when you choose Send in the encrypted development chat.";
         INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID to demonstrate local biometric access. Account passkeys require a configured service.";
         INFOPLIST_KEY_UILaunchScreen_Generation = YES;
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

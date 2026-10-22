@@ -10,6 +10,7 @@ struct LettersRootView: View {
     @State private var previewMedia = ProcessInfo.processInfo.arguments.contains { $0.hasPrefix("--preview-media=") }
     @State private var previewStickers = ProcessInfo.processInfo.arguments.contains("--preview-stickers")
     @State private var previewAccount = ProcessInfo.processInfo.arguments.contains("--preview-registration") || ProcessInfo.processInfo.arguments.contains("--preview-passkey")
+    @State private var showDevelopmentChat = ProcessInfo.processInfo.arguments.contains("--preview-development-chat")
     @State private var selectedTab = ProcessInfo.processInfo.arguments.contains("--preview-alert-all") ? 3 : ProcessInfo.processInfo.arguments.contains("--preview-calls") ? 2 : 0
 
     var body: some View {
@@ -35,6 +36,9 @@ struct LettersRootView: View {
         .sheet(isPresented: $previewMedia) { MediaComposerView { _ in }.environmentObject(store) }
         .sheet(isPresented: $previewStickers) { StickerPickerView { _ in }.environmentObject(store) }
         .sheet(isPresented: $previewAccount) { NavigationStack { AccountAccessView() } }
+        #if DEBUG
+        .sheet(isPresented: $showDevelopmentChat) { NavigationStack { DevelopmentChatView() } }
+        #endif
     }
 }
 
@@ -359,8 +363,8 @@ struct LettersSettingsView: View {
                     }
                 }
                 Section("Current build") {
-                    Text("Design preview only. Live accounts, private chats, notifications, calls and alerts are not connected to the preview. The Matrix encryption SDK is linked for separate development tests. Letterbox invitations are local previews.")
-                    Text("Use sample content only. This build cannot send private messages.")
+                    Text("Sample conversations and Letterbox invitations remain local previews. Debug builds also have a separate encrypted development chat for explicitly configured synthetic accounts. Family accounts, notifications, calls and alerts are unfinished.")
+                    Text("Use fictional content only. The development chat is not a family-ready messaging service.")
                 }
                 Section("Accessibility") {
                     Text("Native Dynamic Type, VoiceOver labels, standard navigation, and Reduce Motion support for the orbital Home animation.")

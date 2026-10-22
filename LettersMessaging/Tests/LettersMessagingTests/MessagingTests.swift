@@ -1,5 +1,6 @@
 import XCTest
 import Foundation
+import MatrixRustSDK
 @testable import LettersMessaging
 
 final class MemoryVault: SessionVault, @unchecked Sendable {
@@ -39,6 +40,16 @@ final class MessagingTests: XCTestCase {
         XCTAssertThrowsError(try decode(expiry: 1000, secret: secret).validate(now: now))
         XCTAssertThrowsError(try decode(expiry: 1300, secret: secret).validate(now: now))
         XCTAssertThrowsError(try decode(expiry: 1060, secret: "bad").validate(now: now))
+    }
+
+    func testDevelopmentDisplayRejectsPlaintextAndUnsafeTrustWarnings() {
+        XCTAssertTrue(ConversationSnapshot.permitsDevelopmentDisplay(.none))
+        XCTAssertTrue(ConversationSnapshot.permitsDevelopmentDisplay(.red(code: .unverifiedIdentity)))
+        for code in [TimelineEventShieldStateCode.sentInClear, .mismatchedSender, .unknownDevice,
+                     .unsignedDevice, .verificationViolation, .authenticityNotGuaranteed] {
+            XCTAssertFalse(ConversationSnapshot.permitsDevelopmentDisplay(.red(code: code)))
+            XCTAssertFalse(ConversationSnapshot.permitsDevelopmentDisplay(.grey(code: code)))
+        }
     }
 
     func testFreshStoreKeysAreIndependentAndCredentialsAreNotPasswords() throws {
@@ -205,6 +216,18 @@ final class MessagingTests: XCTestCase {
         do { _ = try await alice.sendText("must never be sent", roomID: plainID, recipients: [bobID]); XCTFail("Plain room must fail") }
         catch { XCTAssertEqual(error as? MessagingError, .encryptionUnavailable) }
 
+        let reply = "Synthetic encrypted reply " + UUID().uuidString
+        let replyID = try await bob.sendText(reply, roomID: roomID, recipients: [aliceID])
+        for _ in 0..<3 { try await bob.syncOnce(); try await alice.syncOnce() }
+
+        // A room encryption flag does not prevent a malicious client sending a
+        // plaintext event. Native history must refuse to display that injected body.
+        let injected = try await api(base, "/_matrix/client/v3/rooms/\(escape(roomID))/send/m.room.message/\(UUID().uuidString)",
+            token: aliceSession.accessToken, json: ["msgtype": "m.text", "body": "Synthetic injected cleartext"], method: "PUT")
+        XCTAssertEqual(injected.status, 200)
+        let injectedJSON = try XCTUnwrap(try JSONSerialization.jsonObject(with: injected.data) as? [String: Any])
+        let injectedID = try XCTUnwrap(injectedJSON["event_id"] as? String)
+
         try await alice.close()
         try await alice.restore()
         let restoredDevice = try await alice.deviceID()
@@ -214,11 +237,15 @@ final class MessagingTests: XCTestCase {
         for _ in 0..<8 {
             try await alice.syncOnce()
             discovered = try await alice.conversation(roomID: roomID, recipients: [bobID])
-            if discovered.contains(where: { $0.id == eventID && $0.body == body }) { break }
+            if discovered.contains(where: { $0.id == eventID && $0.body == body }) && discovered.contains(where: { $0.id == replyID && $0.body == reply }) { break }
             try await Task.sleep(nanoseconds: 300_000_000)
         }
         XCTAssertTrue(discovered.contains(where: { $0.id == eventID && $0.body == body }))
         XCTAssertEqual(Set(discovered.map(\.id)).count, discovered.count)
+        XCTAssertFalse(discovered.contains(where: { $0.id == injectedID }))
+        XCTAssertTrue(discovered.contains(where: { $0.id == replyID && $0.body == reply && !$0.isOwn }))
+        do { _ = try await alice.conversation(roomID: roomID, recipients: ["@outsider:letters.test"]); XCTFail("History must refuse an unexpected audience") }
+        catch { XCTAssertEqual(error as? MessagingError, .recipientsChanged) }
 
         let restoredText = try await alice.readText(eventID: eventID, roomID: roomID, recipients: [bobID])
         XCTAssertEqual(restoredText, body)
@@ -230,12 +257,12 @@ final class MessagingTests: XCTestCase {
     private func escape(_ value: String) -> String {
         value.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!
     }
-    private func api(_ base: URL, _ path: String, token: String?, json: [String: Any]? = nil) async throws -> Response {
+    private func api(_ base: URL, _ path: String, token: String?, json: [String: Any]? = nil, method: String? = nil) async throws -> Response {
         var request = URLRequest(url: URL(string: base.absoluteString + path)!)
         request.timeoutInterval = 10
         if let token { request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization") }
         if let json {
-            request.httpMethod = "POST"
+            request.httpMethod = method ?? "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try JSONSerialization.data(withJSONObject: json)
         }

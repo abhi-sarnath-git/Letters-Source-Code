@@ -13,7 +13,7 @@ public enum LettersMessagingFoundation {
     public static let sdkRelease = "26.10.02"
 }
 
-/// Development messaging boundary; the portfolio composer is still disconnected.
+/// Development messaging boundary; a separate native Debug chat now uses this actor.
 /// Letterbox grants authorize device login, not personal contact/group membership.
 public actor LettersMessagingClient {
     private let endpoint: URL
@@ -260,7 +260,8 @@ public actor LettersMessagingClient {
         for item in try observation.snapshot.events() {
             guard item.isRemote, case let .eventId(id) = item.eventOrTransactionId,
                   item.eventTypeRaw == "m.room.message" || item.eventTypeRaw == "m.room.encrypted",
-                  seen.insert(id).inserted else { continue }
+                  seen.insert(id).inserted,
+                  ConversationSnapshot.permitsDevelopmentDisplay(item.lazyProvider.getShields(strict: true)) else { continue }
             // Fetch through the existing trusted SDK event API rather than rendering
             // raw timeline content or falling back to plaintext on decryption failure.
             let event = try await room.loadOrFetchEvent(eventId: id)

@@ -154,6 +154,7 @@ extension LocalMedia {
 
 struct MediaComposerView: View {
     let append: (LocalMedia) -> Void
+    private let encryptedDevelopment: Bool
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var recorder=VoiceNoteRecorder()
@@ -161,7 +162,8 @@ struct MediaComposerView: View {
     @State private var requested=AttachmentType.image
     @State private var selected: LocalMedia?
     @State private var error: String?
-    init(append: @escaping (LocalMedia) -> Void) {
+    init(encryptedDevelopment: Bool = false, append: @escaping (LocalMedia) -> Void) {
+        self.encryptedDevelopment = encryptedDevelopment
         self.append=append
         if let value=ProcessInfo.processInfo.arguments.first(where: { $0.hasPrefix("--preview-media=") }),
            let kind=AttachmentType(rawValue: String(value.dropFirst("--preview-media=".count))) {
@@ -175,12 +177,12 @@ struct MediaComposerView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    Label("LOCAL PREVIEW · NOT SENT", systemImage: "info.circle").font(.caption.bold()).foregroundStyle(LettersTheme.accent)
+                    Label(encryptedDevelopment ? "PREPARE ATTACHMENT · NOT SENT" : "LOCAL PREVIEW · NOT SENT", systemImage: "info.circle").font(.caption.bold()).foregroundStyle(LettersTheme.accent)
                     Text("More than words.").font(.largeTitle.bold())
-                    Text("Prepare a voice note, GIF, photo, video or file. This portfolio chat keeps attachments only in memory; it does not send them.").foregroundStyle(LettersTheme.secondary)
+                    Text(encryptedDevelopment ? "Prepare a development attachment. Review it here, then explicitly send it from the encrypted chat." : "Prepare a voice note, GIF, photo, video or file. This portfolio chat keeps attachments only in memory; it does not send them.").foregroundStyle(LettersTheme.secondary)
                     if let selected {
                         LocalMediaPreview(media: selected)
-                        Button("Add to local sample chat") { append(selected); dismiss() }.buttonStyle(.borderedProminent)
+                        Button(encryptedDevelopment ? "Use this attachment" : "Add to local sample chat") { append(selected); dismiss() }.buttonStyle(.borderedProminent)
                         Button("Discard selection", role: .destructive) { self.selected=nil }
                     }
                     Divider()
@@ -201,7 +203,7 @@ struct MediaComposerView: View {
                         }.disabled(recorder.recording)
                     }
                     Text("20 MB per attachment. GIFs come from files you choose; chat terms are not sent to an external GIF search service.").font(.footnote).foregroundStyle(LettersTheme.secondary)
-                    Text("The separate encrypted transport encrypts media bytes and the message containing its key. Live account/chat integration is still required.").font(.footnote).foregroundStyle(LettersTheme.secondary)
+                    Text(encryptedDevelopment ? "Sending requires the connected encrypted development chat. Selecting or recording never starts an upload." : "The separate encrypted transport encrypts media bytes and the message containing its key. Live account/chat integration is still required.").font(.footnote).foregroundStyle(LettersTheme.secondary)
                     if let message=error ?? recorder.error { Text(message).foregroundStyle(.orange).accessibilityAddTraits(.updatesFrequently) }
                 }.padding(24)
             }.background(OrbitBackdrop()).navigationTitle("Attachments").navigationBarTitleDisplayMode(.inline)
@@ -214,7 +216,7 @@ struct MediaComposerView: View {
                 guard values.isRegularFile == true, let size=values.fileSize, size > 0, size <= EncryptedAttachmentDraft.maximumBytes else { throw AttachmentError.tooLarge }
                 let data=try Data(contentsOf: url)
                 let mime=values.contentType?.preferredMIMEType ?? "application/octet-stream"
-                if requested == .image || requested == .gif { try validateImage(data) }
+                if requested == .image || requested == .gif { try LocalMedia.validateImage(data) }
                 selected=LocalMedia(draft: try EncryptedAttachmentDraft(kind: requested, bytes: data, filename: String(url.lastPathComponent.prefix(100)), mimeType: mime))
                 error=nil
             } catch { self.error="Choose a supported file up to 20 MB. Photos and GIFs must be valid images." }
@@ -224,11 +226,16 @@ struct MediaComposerView: View {
                 do { selected = try await LocalMedia.syntheticVideo() } catch { self.error="Synthetic video capture unavailable." }
             }
         }
-        .onChange(of: scenePhase) { phase in if phase != .active { recorder.cancel() } }
+        .onChange(of: scenePhase) { phase in
+            if phase != .active { recorder.cancel(); if encryptedDevelopment { selected = nil; dismiss() } }
+        }
         .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)) { _ in recorder.cancel() }
         .onDisappear { recorder.cancel() }
     }
-    private func validateImage(_ data: Data) throws {
+}
+
+extension LocalMedia {
+    static func validateImage(_ data: Data) throws {
         guard let source=CGImageSourceCreateWithData(data as CFData,nil), CGImageSourceGetCount(source) <= 120,
               let properties=CGImageSourceCopyPropertiesAtIndex(source,0,nil) as? [CFString:Any],
               let w=properties[kCGImagePropertyPixelWidth] as? Int, let h=properties[kCGImagePropertyPixelHeight] as? Int,
@@ -239,6 +246,7 @@ struct MediaComposerView: View {
 struct LocalMediaPreview: View {
     @Environment(\.scenePhase) private var scenePhase
     let media: LocalMedia
+    var received = false
     @State private var audio: AVAudioPlayer?
     @State private var video: AVPlayer?
     @State private var temp: URL?
@@ -260,7 +268,7 @@ struct LocalMediaPreview: View {
             } else { Label("Document ready for local review",systemImage:"doc.text").frame(height:90) }
             Text(media.draft.filename).font(.headline)
             Text(ByteCountFormatter.string(fromByteCount:Int64(media.draft.bytes.count),countStyle:.file)).font(.caption)
-            Text("Not uploaded · no delivery receipt").font(.caption).foregroundStyle(LettersTheme.secondary)
+            Text(received ? "Decrypted on this device · no delivery/read receipt" : "Not uploaded · no delivery receipt").font(.caption).foregroundStyle(LettersTheme.secondary)
             if let error { Text(error).foregroundStyle(.orange) }
         }.padding(20).frame(maxWidth:.infinity,alignment:.leading).background(LettersTheme.surface,in:RoundedRectangle(cornerRadius:24))
             .task(id: media.id) { if media.draft.filename == "synthetic-orbit.mp4" { playVideo() } }

@@ -2,6 +2,7 @@
 // No SMS, public registration, contact approval or identity-verification claims.
 import SwiftUI
 import CryptoKit
+import AVFoundation
 import LettersMessaging
 
 @MainActor
@@ -10,6 +11,7 @@ final class DevelopmentChatModel: ObservableObject {
     @Published var busy = false
     @Published var messages: [ConversationMessage] = []
     @Published var status = "No development session connected."
+    @Published var receivedMedia: LocalMedia?
     @Published var ownID = ""
     @Published var roomID = ""
     @Published var peerID = ""
@@ -89,11 +91,37 @@ final class DevelopmentChatModel: ObservableObject {
         }
     }
 
+    func sendMedia(_ media: LocalMedia) async -> Bool {
+        guard connected, !busy, let client else { return false }
+        busy = true; defer { busy = false }
+        do {
+            _ = try await client.sendAttachment(media.draft, roomID: roomID, recipients: [peerID])
+            status = "Server accepted encrypted attachment."
+            return true
+        } catch {
+            status = "Attachment send did not confirm acceptance. It may still be pending; refresh before retrying."
+            return false
+        }
+    }
+
+    func loadMedia(eventID: String) async {
+        await perform { client in
+            let attachment = try await client.readAttachment(eventID: eventID, roomID: self.roomID, recipients: [self.peerID])
+            if attachment.kind == .image || attachment.kind == .gif { try LocalMedia.validateImage(attachment.bytes) }
+            // Derive voice duration from actual decoded audio, not untrusted message text.
+            let duration: TimeInterval? = attachment.kind == .voiceNote ? try AVAudioPlayer(data: attachment.bytes).duration : nil
+            let draft = try EncryptedAttachmentDraft(kind: attachment.kind, bytes: attachment.bytes,
+                filename: attachment.filename, mimeType: attachment.mimeType, duration: duration)
+            if self.displayEnabled { self.receivedMedia = LocalMedia(draft: draft) }
+            self.status = "Attachment decrypted. Opened locally; documents are shown as metadata only."
+        }
+    }
+
     func signOut() async {
         await perform { client in
             try await client.signOut()
             self.client = nil; self.connected = false; self.ownID = ""
-            self.roomID = ""; self.peerID = ""; self.messages = []
+            self.roomID = ""; self.peerID = ""; self.messages = []; self.receivedMedia = nil
             self.status = "Device session revoked on the server."
         }
     }
@@ -102,7 +130,7 @@ final class DevelopmentChatModel: ObservableObject {
         guard connected, !busy, let client else { return }
         busy = true; defer { busy = false }
         do { try await action(client) }
-        catch { messages = []; status = Self.safeMessage(error) }
+        catch { messages = []; receivedMedia = nil; status = Self.safeMessage(error) }
     }
 
     // Never place raw SDK errors, tokens or server response bodies in UI/log output.
@@ -126,6 +154,8 @@ struct DevelopmentChatView: View {
     @State private var server = ""
     @State private var grant = ""
     @State private var draft = ""
+    @State private var showComposer = false
+    @State private var pendingMedia: LocalMedia?
 
     var body: some View {
         Form {
@@ -168,8 +198,23 @@ struct DevelopmentChatView: View {
                     ForEach(model.messages) { message in
                         VStack(alignment: .leading, spacing: 6) {
                             Text(message.isOwn ? "You" : "Selected contact").font(.caption).foregroundStyle(LettersTheme.accent)
-                            Text(message.body ?? "Encrypted attachment, unsupported event or unavailable content")
+                            if let body = message.body { Text(body) }
+                            else {
+                                Button("Load encrypted attachment, if available") {
+                                    Task { await model.loadMedia(eventID: message.id) }
+                                }.disabled(model.busy)
+                            }
                         }.padding(.vertical, 4)
+                    }
+                    Button("Prepare voice note, GIF, photo, video or file") { showComposer = true }
+                        .disabled(model.busy || model.roomID.isEmpty || model.peerID.isEmpty)
+                    if let pendingMedia {
+                        LocalMediaPreview(media: pendingMedia)
+                        Button("Send encrypted attachment") {
+                            let selected = pendingMedia
+                            Task { if await model.sendMedia(selected) { self.pendingMedia = nil; await model.refresh() } }
+                        }.disabled(model.busy)
+                        Button("Discard attachment", role: .destructive) { self.pendingMedia = nil }.disabled(model.busy)
                     }
                     TextField("Development message", text: $draft, axis: .vertical)
                     Button("Send encrypted message") {
@@ -183,21 +228,25 @@ struct DevelopmentChatView: View {
             Section("Connection status") {
                 if model.busy { ProgressView() }
                 Text(model.status).font(.footnote).accessibilityLabel("Connection status: " + model.status)
-                Text("Refresh is manual. No background sync, push notifications, automatic retries or remote self-destruct is enabled here. Attachments are the next native integration step.")
+                Text("Refresh is manual. No background sync, push notifications, automatic retries or remote self-destruct is enabled here. Attachments download only when selected; no automatic media download is enabled.")
                     .font(.caption)
             }
         }
         .scrollContentBackground(.hidden).background(LettersTheme.background)
         .navigationTitle("Encrypted development chat").navigationBarTitleDisplayMode(.inline)
         .privacySensitive()
-        .onChange(of: model.roomID) { _ in model.messages = []; draft = "" }
-        .onChange(of: model.peerID) { _ in model.messages = []; draft = "" }
+        .sheet(isPresented: $showComposer) { MediaComposerView(encryptedDevelopment: true) { pendingMedia = $0 } }
+        .sheet(item: $model.receivedMedia) { media in
+            ScrollView { LocalMediaPreview(media: media, received: true).padding() }.background(LettersTheme.background)
+        }
+        .onChange(of: model.roomID) { _ in model.messages = []; model.receivedMedia = nil; pendingMedia = nil; draft = "" }
+        .onChange(of: model.peerID) { _ in model.messages = []; model.receivedMedia = nil; pendingMedia = nil; draft = "" }
         .onChange(of: phase) { value in
             model.displayEnabled = value == .active
-            if value != .active { grant = ""; draft = ""; model.messages = [] }
+            if value != .active { grant = ""; draft = ""; pendingMedia = nil; model.receivedMedia = nil; model.messages = [] }
         }
         .overlay { if phase != .active { LettersTheme.background.ignoresSafeArea().overlay(Text("Letters locked")) } }
         .onAppear { model.displayEnabled = phase == .active }
-        .onDisappear { model.displayEnabled = false; grant = ""; draft = ""; model.messages = [] }
+        .onDisappear { model.displayEnabled = false; grant = ""; draft = ""; pendingMedia = nil; model.receivedMedia = nil; model.messages = [] }
     }
 }
