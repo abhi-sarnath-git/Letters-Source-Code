@@ -131,7 +131,7 @@ final class MessagingTests: XCTestCase {
             let bytes = Data(("Synthetic private attachment \(kind.rawValue) \(UUID().uuidString)").utf8)
             let draft = try EncryptedAttachmentDraft(kind: kind, bytes: bytes, filename: "synthetic." + ext,
                 mimeType: mime, duration: kind == .voiceNote ? 1 : nil)
-            try await alice.sendAttachment(draft, roomID: roomID, recipients: [bobID])
+            let sentAttachmentID = try await alice.sendAttachment(draft, roomID: roomID, recipients: [bobID])
             var attachment: ReceivedAttachment?, attachmentID: String?
             var failureType = "No new encrypted media event"
             for _ in 0..<20 {
@@ -139,6 +139,7 @@ final class MessagingTests: XCTestCase {
                 let page = try await api(base, "/_matrix/client/v3/rooms/\(escape(roomID))/messages?dir=b&limit=30", token: aliceSession.accessToken)
                 let pageJSON = try XCTUnwrap(try JSONSerialization.jsonObject(with: page.data) as? [String: Any])
                 let events = pageJSON["chunk"] as? [[String: Any]] ?? []
+                XCTAssertEqual(page.status, 200)
                 for item in events where item["type"] as? String == "m.room.encrypted" {
                     guard let id = item["event_id"] as? String, !seenEvents.contains(id) else { continue }
                     do {
@@ -156,6 +157,7 @@ final class MessagingTests: XCTestCase {
             }
             let received = try XCTUnwrap(attachment, "Recipient must decrypt \(kind.rawValue): \(failureType)")
             let id = try XCTUnwrap(attachmentID); seenEvents.insert(id)
+            XCTAssertEqual(id, sentAttachmentID)
             XCTAssertEqual(received.kind, kind)
             XCTAssertEqual(received.bytes, bytes)
             let envelope = try await api(base, "/_matrix/client/v3/rooms/\(escape(roomID))/event/\(escape(id))", token: aliceSession.accessToken)

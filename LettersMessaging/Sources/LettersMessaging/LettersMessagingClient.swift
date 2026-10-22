@@ -235,8 +235,8 @@ public actor LettersMessagingClient {
 
     /// The room timeline encrypts BOTH uploaded bytes and the message containing the media key.
     /// Generic Client.uploadMedia uploads plaintext and must never be used for private attachments.
-    /// Completion is an SDK send completion, not a recipient delivery/read acknowledgement.
-    public func sendAttachment(_ draft: EncryptedAttachmentDraft, roomID: String, recipients: Set<String>) async throws {
+    /// Returns a server event ID, never a recipient delivery/read acknowledgement.
+    public func sendAttachment(_ draft: EncryptedAttachmentDraft, roomID: String, recipients: Set<String>) async throws -> String {
         try beginOperation(); defer { endOperation() }
         let room = try await guardedRoom(roomID, recipients: recipients)
         let timeline = try await room.timeline()
@@ -256,13 +256,20 @@ public actor LettersMessagingClient {
         case .file:
             attachment = .file(fileInfo: FileInfo(mimetype: draft.mimeType, size: size, thumbnailInfo: nil, thumbnailSource: nil))
         }
+        guard room.isSendQueueEnabled() else { throw AttachmentSendError.paused }
+        let monitor=AttachmentSendMonitor()
+        let subscription=try await room.subscribeToSendQueueUpdates(listener:monitor)
+        defer { subscription.cancel() }
+        let deadline=Task { try? await Task.sleep(nanoseconds:20_000_000_000); if !Task.isCancelled { monitor.finish(.failure(AttachmentSendError.timedOut)) } }
+        defer { deadline.cancel() }
         let params = UploadParameters(source: .data(bytes: draft.bytes, filename: draft.filename),
             caption: nil, formattedCaption: nil, mentions: nil, inReplyTo: nil)
         let handle = try timeline.sendAttachment(params: params, attachment: attachment)
-        try await withTaskCancellationHandler(operation: {
+        return try await withTaskCancellationHandler(operation: {
             try await handle.join()
             try Task.checkCancellation()
-        }, onCancel: { handle.cancel() })
+            return try await monitor.wait()
+        }, onCancel: { handle.cancel(); monitor.finish(.failure(AttachmentSendError.cancelled)) })
     }
 
     /// Read only a supported encrypted attachment in a still-approved encrypted room.
