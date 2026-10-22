@@ -29,6 +29,7 @@ These are original screenshots of Letters running natively in an iPhone simulato
 | Oil Markets | [Open image](22-oil-markets-preview.png) | WTI/Brent indicative-CFD selection, USD/barrel. Explicit fictional sample prices, not physical spot or futures settlement quotes. |
 | Bitcoin Markets | [Open image](23-bitcoin-markets-preview.png) | Venue-specific Coinbase BTC/USD selection with explicit fictional sample prices. |
 | Stocks Markets | [Open image](24-stocks-markets-preview.png) | Current four-section Markets layout and global share-listing picker. Explicit fictional sample prices; provider availability/delays are separate. |
+| Encrypted development chat | [Open image](25-encrypted-development-chat.png) | Actual Debug configuration screen, disconnected and empty. Real SDK text/media tests passed separately; this image is not proof of a live native conversation. |
 
 The [first three-section Markets capture](05-markets-preview.png) is retained as historical design progress. The current Markets screen includes Stocks, Indexes, Oil and Bitcoin and opens from the Home menu.
 
@@ -207,3 +208,17 @@ Current four-section Markets layout and global share-listing picker. Explicit fi
 A still image cannot establish encryption, animation, microphone behavior, message delivery, biometric authentication or remote deletion. Hosted tests separately verified independent-recipient decryption and server-side ciphertext for five media kinds, and real WebAuthn signature/origin/UV/replay/counter checks using a synthetic authenticator. They did not involve real SMS, biometric enrollment or two physical iPhones.
 
 Native chats/media/timers remain local previews. SMS and live passkey account actions are disabled. Calls and Alert All do not send anything. Remote expiry, media cleanup, account/chat integration and physical-device/accessibility/recovery review remain required. Read [account/media/timer implementation limits](../../Docs/ACCOUNT_AND_MEDIA.md), [encryption evidence](../../Docs/ENCRYPTED_MESSAGING.md), [Markets limitations](../../Docs/MARKETS.md) and the [completion checklist](../../Docs/CHECKLIST.md).
+
+
+## Native development integration — 22 October 2026
+
+<details>
+<summary>25 — encrypted development chat configuration</summary>
+
+![Encrypted development chat configuration, disconnected](25-encrypted-development-chat.png)
+
+Original native capture of the Debug-only account/session connection screen. No server URL, login grant, real account or private message was entered. Controls depend on an operator-configured synthetic server. Manual room/contact IDs remain a development step; end-user invitation enrollment and server room policy are unfinished. This screenshot demonstrates the actual compiled native configuration interface, not a completed messenger or delivery between phones.
+
+Source `e79072dccd6ffb47ab9b177423b81f24e812e675`; successful [workflow 39761150753](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39761150753), job 119765991763. Artifact 12419127205 SHA-256 `966afe0e68d0c718cc611a76dd233730c83fbeacb6dcaabbd1984d6cb84c2b04` was verified before extracting and inspecting this unmodified PNG. Individual image SHA-256: `a17c2a81a990394bc530cc1a6c366117649d74d520ec0d29863af732b1a7c407`.
+
+</details>

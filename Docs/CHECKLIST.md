@@ -131,9 +131,20 @@ See [ACCOUNT_AND_MEDIA.md](ACCOUNT_AND_MEDIA.md) for exact boundaries and remain
 - [x] Initial source passed hosted native compilation and restored history discovery (86b0e389, run 39759013295; full capture completion separately pending/superseded).
 - [x] Connect review-first voice/photo/GIF/video/file preparation and explicit encrypted media sends; on-demand recipient preview.
 - [x] Clear visible development plaintext on background/navigation, redact errors and keep grants out of persistent UI preferences.
-- [ ] Verify expanded hosted checks: bidirectional restored discovery, injected plaintext refusal, trust warnings, audience checks and all prior encryption/media tests.
-- [ ] Inspect new native development-screen capture before adding it to the public gallery.
+- [x] Verify expanded hosted checks (source e79072d, run 39761150753): bidirectional restored discovery, injected plaintext refusal, trust warnings, audience checks and all prior encryption/media tests.
+- [x] Inspect original native development-screen capture after artifact SHA-256 verification; publish as 25-encrypted-development-chat.png with its disconnected-screen caption.
 - [ ] Replace operator-entered room/account IDs with server-authorized personal contacts and group membership.
 - [ ] Configure actual trusted HTTPS service, physical-device signing and full enrollment only after the remaining release gates are met.
 
 This development screen requires operator-provided synthetic accounts on a trusted server. The current CI server is temporary and loopback-only, and no public messaging endpoint is supplied. SMS is still disabled. See [development chat setup and limits](DEVELOPMENT_CHAT.md).
+
+
+## Final owner direction — completed portfolio archive
+
+- [x] Record zero paid services, native SwiftUI, invitation enrollment instead of SMS, and exclusion of unsupported free-signing capabilities.
+- [x] Confirm no public launch, App Store/TestFlight release or production deployment is intended.
+- [x] Document completion criteria, annotated source/code guide, setup evidence and final archive location in ARCHIVE_PLAN.md.
+- [ ] Complete the normal native account/contact/group/chat experience and remaining agreed functional scope.
+- [ ] Complete security/lifecycle/recovery and interactive validation for the included scope.
+- [ ] Prepare the finished recruiter-facing README, reproducible setup and verified final source/docs backup.
+- [ ] Only then freeze a final version and archive the public GitHub repository; do not archive the current incomplete app.

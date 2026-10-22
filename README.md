@@ -6,13 +6,19 @@ An original, invite-only iPhone messenger targeting the agreed WhatsApp-style fe
 
 Letters is the app name. **Letters' Source Code** is this public portfolio project's title; the public GitHub repository is [Letters-Source-Code](https://github.com/abhi-sarnath-git/Letters-Source-Code).
 
+## Portfolio completion target
+
+The owner wants a **completed, well-annotated native portfolio application, then an archive**—no public launch, paid services or production deployment. The repository is still in development and is not archived. See [completion criteria and archive plan](Docs/ARCHIVE_PLAN.md) and [verified zero-cost options and limitations](Docs/FREE_OPTIONS.md).
+
+The latest native development milestone connects real encrypted text/media operations and restored history to a separate Debug screen. [Its setup, successful test evidence and remaining limits](Docs/DEVELOPMENT_CHAT.md) distinguish implemented transport from unfinished end-user enrollment and contact policy.
+
 ## Reading and debugging the code
 
 Source files now include comments explaining responsibilities, security guards and important blocks: `//` / `///` in Swift and `#` in Python, shell and workflow YAML. Start with the [code and debugging guide](Docs/CODE_GUIDE.md). Keep these explanations current when extending Letters; do not put secrets or private messages in debugging output.
 
 ## Portfolio screenshots
 
-[View Prototype Screenshots](Letters/Prototype%20Screenshots/README.md) for verified native captures of Chats, Alert All and Letterbox QR, including implementation status and build evidence. Screenshots will accompany completed feature milestones; previews are labelled accurately.
+[Browse the complete feature gallery](Letters/Prototype%20Screenshots/FEATURE_GALLERY.md) for original native screenshots with per-feature status and build provenance. Screenshots will accompany completed feature milestones; previews are labelled accurately.
 
 ## What this build actually does
 

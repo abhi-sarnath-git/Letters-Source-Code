@@ -21,6 +21,10 @@ The SDK media queue can persist pending operations; production reauthorization o
 
 The app obscures its development screen outside the active scene and clears visible plaintext on leaving/backgrounding. This is not screenshot prevention or proof against a compromised device. Real iPhone Keychain/lock/reboot testing remains outstanding.
 
-## Validation
+## Verified development milestone
 
-Local syntax and project-format checks passed. The expanded hosted integration must prove bidirectional text discovery after session restoration, unique event IDs, refusal of an unexpected audience, and rejection of plaintext events maliciously injected into an encrypted room, alongside the existing encrypted text/media, raw-server ciphertext, outsiders and session tests. Do not infer a passed hosted result from source publication; the final CI result is recorded in the progress checkpoint.
+Source `e79072dccd6ffb47ab9b177423b81f24e812e675`, [workflow 39761150753](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39761150753), completed successfully. All seven messaging tests passed, including bidirectional text discovery after device-session restoration, unique event IDs, unexpected-audience refusal, plaintext injection exclusion from history and direct text/attachment reads, encrypted media roundtrips for all five types, raw-server ciphertext checks and outsider/session boundaries. Admission/account/core/news checks, native simulator compilation, capture/QR validation and unsigned simulator packaging also passed.
+
+The two SDK clients run in one hosted Mac process with independent accounts and stores. These tests do not demonstrate two physical iPhones, native account enrollment, interactive use of the new screen, iPhone Keychain lock/reboot behavior or production contact permissions. The new native capture shows the disconnected development configuration screen only, with no credentials or messages. Its original artifact digest is `966afe0e68d0c718cc611a76dd233730c83fbeacb6dcaabbd1984d6cb84c2b04`.
+
+The owner subsequently chose a completed, zero-cost native portfolio application with no production release. Invitation enrollment will replace SMS and unsupported free-signing capabilities will be excluded. This Debug screen is an intermediate integration milestone; [the completion plan](ARCHIVE_PLAN.md) remains unfinished.

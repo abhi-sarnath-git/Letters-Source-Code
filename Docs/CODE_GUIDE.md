@@ -28,3 +28,16 @@ Keep comments next to the code they explain. Describe why a guard, transaction o
 5. Record the failing test/step, non-sensitive error category, expected result and source commit. Never log QR invitation secrets, grants, passwords, access/refresh tokens, store keys, real messages or serialized session records.
 
 The new login bridge is development-only. Review `MATRIX_ADMISSION.md` and `ENCRYPTED_MESSAGING.md` before extending it; native account UI, server-enforced room/contact policy, device verification and recovery are still required.
+
+
+## Read the native encrypted development path
+
+1. `LettersRootView.swift` exposes the Debug-only development entry separately from fictional `PreviewStore` conversations.
+2. `DevelopmentChatView.swift` handles native input and privacy/lifecycle UI. Its model serializes user operations, clears one-use grants and renders safe errors without SDK secrets. Selecting an attachment does not upload it.
+3. `LetterboxLoginGrant.swift` validates a short-lived credential for an approved synthetic account. It is not the invitation QR or a permanent account password.
+4. `LettersMessagingClient.swift` owns the SDK session, keyed store and authenticated operations. Follow `guardedRoom` before sends, and `requireTrustedEvent` before event-ID reads. Encryption/audience checks must not be bypassed to make a demo pass.
+5. `ConversationSnapshot.swift` applies SDK timeline diffs in order and checks trust shields. An unverified human identity is explicitly disclosed in development; plaintext, unsigned/unknown devices and changed/mismatched identities are refused.
+6. `MediaComposerView.swift` prepares and reviews bytes locally. The SDK actor encrypts media bytes and their key-bearing room event; generic plaintext uploads are prohibited. Recipient image/size/type checks precede local preview.
+7. `MessagingTests.swift` and `scripts/test-encrypted-messaging.py` provide reproducible independent-client encryption/boundary evidence. Tests use synthetic accounts and delete their private temporary stores.
+
+The normal invitation/account flow is the next integration phase. A good comment explains why a check exists or what state transition owns a resource; it does not restate every assignment. Keep comments synchronized with behavior, and put unresolved product/security boundaries in the documentation rather than hiding them behind reassuring icons.

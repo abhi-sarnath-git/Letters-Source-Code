@@ -1,36 +1,35 @@
-# Free-first development plan
+# Zero-cost portfolio development and installation options
 
-Checked against provider documentation on 21 October 2026. No accounts created, payments enabled, source published, or infrastructure provisioned.
+Provider documentation checked 22 October 2026. The owner requires zero paid services and has chosen a completed native portfolio application followed by an archive, without a public launch or production deployment. See [the completion/archive plan](ARCHIVE_PLAN.md). No new accounts, billing upgrades, sideload tools or public services were activated for this research.
 
-| Need | Free route | Limitation |
+## Chosen path
+
+Keep SwiftUI and the existing GitHub-hosted native builds. Finish the actual account/contact/chat flows and validate against isolated, reproducible local infrastructure. Invitations replace real SMS enrollment. Preserve source, screenshots, setup instructions and test evidence on GitHub. Personal device installation is optional testing, not a family distribution commitment.
+
+Apple's free Personal Team provisioning expires after seven days and has device/app limits. A compatible Xcode installation is one personal-testing route; the current Mac cannot build the pinned app locally, so hosted builds remain necessary. See [Apple's free-account limits](https://developer.apple.com/help/account/basics/about-your-developer-account/).
+
+Apple's capability table does not provide Associated Domains or native push notifications to a free Apple account. The current native passkey design needs Associated Domains, so free signing is not a complete substitute for that design. Local biometric access protection is a different feature and still requires implementation/testing. TestFlight/App Store distribution is outside the chosen scope. See [Apple's capability matrix](https://developer.apple.com/help/account/reference/supported-capabilities-ios/).
+
+## Optional free personal installation
+
+[AltStore Classic](https://altstore.io/) is a third-party sideloading route worth testing after we produce a physical-device build; the existing simulator ZIP cannot be installed on an iPhone. Its current Mac download requires macOS 11 or later. This is a candidate, not a verified Letters installation on the owner's Mac/iPhone.
+
+[AltStore's limits](https://faq.altstore.io/altstore-classic/your-altstore) include seven-day app expiry/refresh and three active sideloaded apps per device. It requires device pairing/setup and Apple authentication handled by the owner. It does not unlock Apple's unsupported signing entitlements. No signing tools were installed and no Apple credentials were requested or uploaded.
+
+## Free hosting alternatives researched — not being deployed
+
+| Option | Suitable use | Limits and tradeoffs |
 |---|---|---|
-| Code and portfolio presentation | Local project, design previews and source repository | A preview does not establish working messaging or E2EE |
-| Current Mac build tools | GitHub Actions standard macOS runners for a public repository | Public source is a deliberate choice; storage limits still apply; no interactive remote desktop |
-| Private-source build alternative | Codemagic personal plan: 500 free macOS M2 build minutes/month | Allowance is for individuals; overage becomes paid if billing is enabled; builds are not an interactive simulator service |
-| Local experimentation | Older compatible Xcode, such as 15.2 on Ventura 13.5+ | Does not guarantee support for modern SDK dependencies, current iPhones or current App Store submissions |
-| Messaging server prototype | Oracle Always Free eligible Arm compute | Currently 2 OCPUs / 12 GB total and 200 GB combined volume allowance; regional capacity limits and idle reclamation; stay within all resource allowances |
-| Local server demonstration | Existing computer, local network | No new hosting bill, but needs power and availability; external access requires deliberate network configuration |
-| End-to-end encryption foundation | Matrix Rust SDK | Free SDK; integration, recovery, operation and security validation still required |
-| Personal iPhone testing | Free Apple account and compatible local Xcode | Provisioning expires in seven days; device limits; not practical family distribution |
-| TestFlight and App Store | No generally free route for an ordinary individual portfolio project | Apple Developer Program normally US$99/year or local equivalent; organizational fee-waiver eligibility is limited |
+| Existing compatible computer | Local Synapse/admission database and repeatable demo | Must stay on for a live demo; storage, backups, electricity and network availability remain the owner's responsibility. Internet access is a separate security decision. |
+| Oracle Always Free | Possible future small experimental server | Home-region capacity can be unavailable, and idle machines can be reclaimed. The saved Osaka stack is not a running server. Do not upgrade to paid billing. [Official limits](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm). |
+| Tailscale Personal | Optional private access to an existing server | Currently up to six users for noncommercial personal use. It supplies networking, not compute/storage. An optional public Funnel has bandwidth limits; enabling it exposes a service and is not authorized here. [Pricing](https://tailscale.com/pricing), [Funnel limits](https://tailscale.com/docs/features/tailscale-funnel). |
+| GitHub Pages | Free static recruiter-facing documentation/demo site | It cannot host our Synapse process, admission database or private messaging backend. [Official description](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages). |
+| Render Free | Short-lived experiments | Services sleep after inactivity, files are ephemeral and its free Postgres expires after 30 days. This is unsuitable as the durable store for the current messaging design. [Official limits](https://render.com/docs/free). |
 
-## Recommendation
+No ongoing free SMS delivery service has been verified for this project. For example, [Twilio's trial](https://www.twilio.com/docs/usage/trials) is time-limited, not permanent free verification. The owner chose invitation-based enrollment; test OTPs must never be represented as proof that a real phone number was verified.
 
-Keep the portfolio phase at $0: use local previews and a free Mac cloud build allowance. Choose public-source GitHub Actions only if the owner wants the source public; otherwise begin with Codemagic's personal allowance. Neither requires buying a new Mac for cloud compilation. A cloud simulator build cannot be installed directly on an iPhone. Real family deployment comes after encryption and membership verification, with Apple distribution and dependable hosting budgeted separately.
+A Home Screen web application was also considered: Safari supports web passkeys and web push without native distribution, but it would require a separate web implementation. The owner chose to retain native SwiftUI instead. This document does not authorize that pivot.
 
-Oracle is a plausible free server experiment, not a promise of uninterrupted family service. A free build host is not a messaging host. Full feature parity, including voice relay, large media, notifications and storage, cannot be guaranteed to stay within free allowances indefinitely.
+## Honest boundaries
 
-## Sources
-
-- https://docs.github.com/en/billing/concepts/product-billing/github-actions
-- https://docs.codemagic.io/billing/pricing/
-- https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm
-- https://developer.apple.com/xcode/system-requirements
-- https://developer.apple.com/help/account/basics/about-your-developer-account
-- https://developer.apple.com/help/account/membership/program-enrollment/
-- https://developer.apple.com/help/account/membership/fee-waivers/
-- https://github.com/matrix-org/matrix-rust-sdk
-
-## Alert All scope update
-
-Video calling has been replaced by Alert All for all approved members. The local rehearsal adds no hosting expense. Real encrypted fan-out and push delivery still need server capacity and Apple provisioning; saving an Oracle stack is not a running service. Critical Alerts entitlement is not assumed, and no notification delivery guarantee is made. See ALERT_ALL.md.
+Free tools can support a complete, reproducible portfolio app. They do not establish uninterrupted public service, unlimited media storage, guaranteed emergency alerts, Apple-supported family distribution, or identical WhatsApp behavior. The finished application must advertise its actual included scope and remove misleading nonfunctional controls. Infrastructure limitations and any unvalidated physical-device behavior must remain visible in the archive.
