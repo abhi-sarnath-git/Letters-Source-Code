@@ -260,8 +260,11 @@ public actor LettersMessagingClient {
         let monitor=AttachmentSendMonitor()
         let subscription=try await room.subscribeToSendQueueUpdates(listener:monitor)
         defer { subscription.cancel() }
-        let deadline=Task { try? await Task.sleep(nanoseconds:20_000_000_000); if !Task.isCancelled { monitor.finish(.failure(AttachmentSendError.timedOut)) } }
+        // A dispatch deadline cannot inherit/cancel the caller's structured-concurrency task.
+        let deadline=DispatchWorkItem { monitor.finish(.failure(AttachmentSendError.timedOut)) }
+        DispatchQueue.global().asyncAfter(deadline:.now()+20,execute:deadline)
         defer { deadline.cancel() }
+        defer { withExtendedLifetime(timeline) {} }
         let params = UploadParameters(source: .data(bytes: draft.bytes, filename: draft.filename),
             caption: nil, formattedCaption: nil, mentions: nil, inReplyTo: nil)
         let handle = try timeline.sendAttachment(params: params, attachment: attachment)

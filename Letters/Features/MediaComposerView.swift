@@ -141,10 +141,14 @@ extension LocalMedia {
         if let file { try? FileManager.default.removeItem(at: file.deletingLastPathComponent()) }; file=nil
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
-    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        // Keep a finished recording available for explicit review; no auto-send at the time limit.
-        recording=false; readyToReview=flag; timer?.invalidate(); timer=nil
-        if !flag { cancel(); error="Recording was interrupted. Please record again." }
+    nonisolated func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        let recorderID=ObjectIdentifier(recorder)
+        Task { @MainActor [weak self] in
+            guard let self, let active=self.recorder, ObjectIdentifier(active) == recorderID else { return }
+            // Ignore a stale delegate callback after cancel/restart. Never auto-send at the limit.
+            recording=false; readyToReview=flag; timer?.invalidate(); timer=nil
+            if !flag { cancel(); error="Recording was interrupted. Please record again." }
+        }
     }
 }
 
