@@ -61,12 +61,14 @@ def main():
         config = {
             'server_name': 'letters.test', 'pid_file': str(root/'synapse.pid'),
             'listeners': [{'port': port, 'tls': False, 'type': 'http', 'bind_addresses': ['127.0.0.1'],
-                           'resources': [{'names': ['client'], 'compress': False}]}],
+                           'resources': [{'names': ['client', 'media'], 'compress': False}]}],
             'database': {'name': 'sqlite3', 'args': {'database': str(root/'homeserver.db')}},
             'media_store_path': str(root/'media'), 'signing_key_path': str(root/'signing.key'),
             'report_stats': False, 'enable_registration': False, 'trusted_key_servers': [],
             'suppress_key_server_warning': True, 'federation_domain_whitelist': [],
-            'serve_server_wellknown': False, 'enable_media_repo': False,
+            'serve_server_wellknown': False, 'enable_media_repo': True,
+            # Exercise encrypted uploads on this disposable loopback server only.
+            'max_upload_size': '20M', 'url_preview_enabled': False,
             # A standard stored password must not bypass Letterbox approval.
             'password_config': {'enabled': True, 'localdb_enabled': False},
             'modules': [{'module': 'letters_synapse_auth.LettersAuthProvider',
