@@ -44,3 +44,11 @@ Foreground sweeps remove expired payloads from active and saved local sample pro
 - [Matrix encrypted attachment specification](https://spec.matrix.org/latest/client-server-api/#extensions-to-mroommessage-msgtypes)
 
 No SMS account, paid service, deployment, new entitlement enrollment or real account was created in this milestone.
+
+## Hosted verification evidence
+
+Source `86fa1244f3a55bfc99cc91f755fd52eb018f2830`, [workflow 39729529591](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39729529591): account/passkey tests, timer/core tests, native iPhone compilation and SDK media integration steps passed. All five media kinds reached a separate SDK recipient, decrypted to the original synthetic bytes, and had ciphertext at the server media endpoint. Outsider attachment access failed. The send boundary waits for a matching server event acknowledgement and maps queue errors without logging raw details. File metadata parsing explicitly rejects plaintext media sources.
+
+The WebAuthn test uses a synthetic P-256 authenticator and validates actual signatures, origin, required user verification, counters, replay/expiry and removed-member denial. No real SMS, biometric enrollment, Apple passkey account or physical iPhone is involved. Snapshot capture and interactive device QA are separate from these checks.
+
+Final native GIF layout source `50984f8210d640091425d09553987205c9856163`, [run 39730967900](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39730967900), passed all checks again. All 18 new feature captures were inspected before portfolio publication. Live release still needs persisted authorization for pending SDK send-queue items across restarts/audience changes; timeout or cancellation alone cannot guarantee a queued send is recalled.

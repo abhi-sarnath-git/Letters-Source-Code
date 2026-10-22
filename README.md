@@ -100,3 +100,5 @@ No Element application source has been copied. The pinned SDK's Apache license i
 ## Media and account-access development
 
 Sample chats now prepare voice notes, GIFs, photos, videos and files, and expose a futuristic clock menu for local timer settings and confirmed Self-Destruct Now. A separate SDK boundary implements encrypted attachment operations. Invitation+phone OTP+passkey registration is a development boundary with SMS disabled; native account actions are labelled unavailable. Read [implementation and security limits](Docs/ACCOUNT_AND_MEDIA.md) before interpreting portfolio screens as live messaging or account support.
+
+[Browse Letters’ per-feature portfolio screenshots](Letters/Prototype%20Screenshots/FEATURE_GALLERY.md), including news and all Markets categories. Captions distinguish local previews from separately tested service foundations.

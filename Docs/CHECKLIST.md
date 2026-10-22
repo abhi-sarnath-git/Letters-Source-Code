@@ -109,12 +109,12 @@ Finish app functionality before discussing deployment. Continue with the encrypt
 - [x] Add local record/review/discard voice notes, protected temporary recording and background/interruption cancellation.
 - [x] Add local image/GIF/video/file import and bounded in-memory sample attachments.
 - [x] Add SDK encrypted attachment operations for five media kinds; no plaintext upload fallback.
-- [ ] Pass hosted independent-recipient media decryption/raw server ciphertext checks for all five types.
+- [x] Pass independent-recipient media decryption/raw server ciphertext checks for all five types (run 39729529591).
 - [x] Add disabled-by-default SMS registration boundary, invitation/OTP/passkey binding and native passkey ceremony adapter.
 - [x] Add local registration/biometric/passkey design surfaces with honest disabled states.
-- [ ] Pass hosted real WebAuthn signature/origin/UV/replay/counter verification tests.
+- [x] Pass real WebAuthn signature/origin/UV/replay/counter verification tests (run 39729529591).
 - [x] Add clock control and exact timer choices; local sample expiry and confirmed Self-Destruct Now.
-- [ ] Pass hosted timer tests and native compilation; inspect/publish individual feature captures.
+- [x] Pass timer/core tests and native compilation; inspect/publish individual feature captures 07–24 with original PNGs, captions and checksums (runs 39729529591 / 39730967900).
 - [ ] Deploy account endpoints, configure a trusted passkey domain and SMS provider only after owner approval.
 - [ ] Replace legacy developer-only account creation entry points with enforced production invitation+phone+passkey policy.
 - [ ] Connect native account/chat screens to authenticated encrypted rooms and test on independent iPhones.

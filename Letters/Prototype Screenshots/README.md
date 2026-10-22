@@ -1,6 +1,8 @@
 # Prototype Screenshots
 
-Original screenshots of Letters running in an iPhone 16 Pro simulator, captured on 21 October 2026 with Xcode 16.4 / iOS 18.5. These are actual native SwiftUI screens, not design mockups. All conversations and profiles are fictional.
+**[Browse the complete per-feature gallery](FEATURE_GALLERY.md)** — chat clock, self-destruct controls, voice notes, photos, GIFs, videos, files, registration/passkeys, news topics, Markets, stickers and calling previews.
+
+Original screenshots of Letters running in an iPhone simulator, captured on 21–22 October 2026. The initial set used an iPhone 16 Pro / Xcode 16.4 / iOS 18.5; each later milestone links its own source and build provenance. These are actual native SwiftUI screens, not design mockups. All conversations and profiles are fictional.
 
 **Current stage: portfolio prototype with live public news; messaging remains local.** These screenshots demonstrate completed local interfaces and behavior, not working encrypted communication. Live encrypted messages in these interfaces, voice calls, emergency notifications and cross-device invitation redemption remain unavailable. A separate Matrix encryption development package now exists; see [its implementation and test limits](../../Docs/ENCRYPTED_MESSAGING.md). These images are not evidence of encrypted delivery. Home now fetches public news separately; the new Home screenshot deliberately uses an identified sample headline.
 
@@ -30,7 +32,7 @@ An Earth/atom replaces the Home name heading, with orbiting electrons at runtime
 
 The image uses a **fictional, labelled sample headline**, not an actual news event or a quote from The Guardian. Normal mode reads public Guardian RSS, with source attribution, five-minute foreground refresh and honest offline/cache states. This screenshot shows the menu button, not the open menu; a still image cannot demonstrate orbital motion or transitions. Physical-device usability and accessibility QA remain outstanding.
 
-Capture source: `28731c4bba2aede95609ea84e528bd337a566a28`, [Home refinement run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39556128782). The original three screenshots below retain their earlier source provenance.
+Capture source: `28731c4bba2aede95609ea84e528bd337a566a28`, [Home refinement run](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39556128782). The original three screenshots retain their earlier source provenance.
 
 ## Markets — opened from Home drop-down
 

@@ -51,3 +51,9 @@ A successful integration run establishes only the tested exchange and failure ca
 - [Synapse test release](https://github.com/element-hq/synapse/releases/tag/v1.163.0)
 
 Matrix Rust SDK's Apache 2.0 license is retained under `ThirdParty/MatrixRustSDK-LICENSE.txt`. Transitive dependencies and binary contents still need a release notice/license inventory. Synapse is an isolated test dependency; it is not bundled with the app.
+
+## Encrypted media milestone — 22 October 2026
+
+Source `86fa1244f3a55bfc99cc91f755fd52eb018f2830`, [run 39729529591](https://github.com/abhi-sarnath-git/Letters-Source-Code/actions/runs/39729529591): the SDK integration step passed for voice notes, images, GIFs, video and files. A distinct SDK client/store decrypted each original synthetic payload; raw server media bytes differed from plaintext; encrypted room events did not disclose filenames/content; outsider reads were blocked. The temporary loopback Synapse now enables its bounded media repository (20 MB); public service deployment remains unchanged.
+
+Native media recording/import/playback surfaces remain local previews, separate from these real transport tests. Test media-envelope bytes do not certify every codec, playback UX, metadata privacy, real-device protected-file behavior or independent physical iPhones. The account milestone also adds a disabled-SMS invitation/OTP/passkey development boundary with actual WebAuthn verification tests. See [ACCOUNT_AND_MEDIA.md](ACCOUNT_AND_MEDIA.md) for boundaries, lifecycle controls, local timers and remaining release requirements.
