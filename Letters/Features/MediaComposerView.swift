@@ -233,6 +233,7 @@ struct MediaComposerView: View {
 }
 
 struct LocalMediaPreview: View {
+    @Environment(\.scenePhase) private var scenePhase
     let media: LocalMedia
     @State private var audio: AVAudioPlayer?
     @State private var video: AVPlayer?
@@ -258,6 +259,7 @@ struct LocalMediaPreview: View {
             Text("Not uploaded · no delivery receipt").font(.caption).foregroundStyle(LettersTheme.secondary)
             if let error { Text(error).foregroundStyle(.orange) }
         }.padding(20).frame(maxWidth:.infinity,alignment:.leading).background(LettersTheme.surface,in:RoundedRectangle(cornerRadius:24))
+            .onChange(of: scenePhase) { phase in if phase != .active { audio?.pause(); video?.pause() } }
             .onDisappear { audio?.stop(); video?.pause(); if let temp { try? FileManager.default.removeItem(at:temp.deletingLastPathComponent()) } }
     }
     private func playAudio() {

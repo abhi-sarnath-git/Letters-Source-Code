@@ -291,10 +291,11 @@ public actor LettersMessagingClient {
         default: throw AttachmentError.unsupportedEvent
         }
         guard let size, size > 0, size <= UInt64(EncryptedAttachmentDraft.maximumBytes) else { throw AttachmentError.tooLarge }
-        // Ruma serializes an encrypted MediaSource as the encrypted-file object. Fail closed on a plaintext URL.
+        // Ruma serializes MediaSource as {"file": encryptedFile}; a {"url": ...} source is plaintext.
         guard let json = try JSONSerialization.jsonObject(with: Data(source.toJson().utf8)) as? [String: Any],
-              json["key"] is [String: Any], json["iv"] is String, json["hashes"] is [String: Any],
-              json["v"] as? String == "v2" else { throw AttachmentError.notEncrypted }
+              let encrypted = json["file"] as? [String: Any],
+              encrypted["key"] is [String: Any], encrypted["iv"] is String, encrypted["hashes"] is [String: Any],
+              encrypted["v"] as? String == "v2" else { throw AttachmentError.notEncrypted }
         _ = try await guardedRoom(roomID, recipients: recipients)
         let folder = root.appendingPathComponent("incoming-media", isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])

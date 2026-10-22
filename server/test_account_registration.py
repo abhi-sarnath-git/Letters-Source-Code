@@ -60,6 +60,14 @@ class AccountTests(unittest.TestCase):
         group=self.service.create_group(self.owner['session_token'],'Test')
         code=self.service.issue(self.owner['session_token'],group_id=group['id'])['code']
         with self.assertRaises(Denied): self.accounts.begin(code,'Test','+44','7700900123')
+    def testInvalidPasskeyAttemptsPersistAndLockOut(self):
+        handle=self.begin(); self.verify(handle)
+        for _ in range(5):
+            with self.assertRaises(Denied): self.accounts.finish(handle,{'id':'invalid'})
+        with self.service.db() as c:
+            self.assertEqual(c.execute('SELECT attempts FROM enrollment').fetchone()[0],5)
+            self.assertEqual(c.execute('SELECT count(*) FROM members').fetchone()[0],1)
+        with self.assertRaises(Denied): self.accounts.finish(handle,{'id':'invalid'})
     def testSMSDeliveryFailureDoesNotLeaveUsableProof(self):
         def fail(phone,otp): raise RuntimeError('Synthetic provider failure')
         self.accounts.sms=fail

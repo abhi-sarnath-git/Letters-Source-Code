@@ -144,26 +144,33 @@ class AccountRegistration:
         return options
 
     def finish(self, handle, credential):
+        result = None
         with self.admission.db() as c:
             row = c.execute('SELECT * FROM enrollment WHERE id=?', (self._hash('handle', handle),)).fetchone()
-            if row is None or row['consumed'] or not row['verified'] or row['expires'] <= self.admission.clock():
+            if row is None or row['consumed'] or not row['verified'] or row['attempts'] >= 5 or row['expires'] <= self.admission.clock():
                 raise Denied('Registration unavailable')
             invite = self._invite(c, row['invitation'])
             try:
                 if len(json.dumps(credential)) > 32768:
                     raise ValueError('Oversized credential')
-                credential_id, public_key, counter = self.verifier.register(credential, row['challenge'], self.rp_id, self.origin)
+                verified = self.verifier.register(credential, row['challenge'], self.rp_id, self.origin)
             except Exception:
-                raise Denied('Passkey verification failed') from None
-            # The invite is consumed and the member/contact/passkey created in ONE transaction.
-            # No account or session exists after OTP alone, and no default password is generated.
-            c.execute('INSERT INTO members(id,name,active) VALUES(?,?,1)', (row['member'],row['name']))
-            c.execute('INSERT INTO account_credentials VALUES(?,?,?,?,?)', (credential_id,row['member'],row['phone_hash'],public_key,counter))
-            a,b = sorted([invite['issuer'],row['member']])
-            c.execute('INSERT INTO contacts VALUES(?,?)', (a,b))
-            c.execute('UPDATE invitations SET used_by=? WHERE id=?', (row['member'],invite['id']))
-            c.execute('UPDATE enrollment SET consumed=1 WHERE id=?', (row['id'],))
-            return {'member_id':row['member'], 'session_token':self.admission._session(c,row['member'])}
+                verified = None
+                # Commit failed-ceremony attempts rather than rolling them back on denial.
+                c.execute('UPDATE enrollment SET attempts=attempts+1 WHERE id=?', (row['id'],))
+            if verified is not None:
+                credential_id, public_key, counter = verified
+                # Invite, member, contact and passkey commit atomically. OTP alone creates nothing.
+                c.execute('INSERT INTO members(id,name,active) VALUES(?,?,1)', (row['member'],row['name']))
+                c.execute('INSERT INTO account_credentials VALUES(?,?,?,?,?)', (credential_id,row['member'],row['phone_hash'],public_key,counter))
+                a,b = sorted([invite['issuer'],row['member']])
+                c.execute('INSERT INTO contacts VALUES(?,?)', (a,b))
+                c.execute('UPDATE invitations SET used_by=? WHERE id=?', (row['member'],invite['id']))
+                c.execute('UPDATE enrollment SET consumed=1 WHERE id=?', (row['id'],))
+                result = {'member_id':row['member'], 'session_token':self.admission._session(c,row['member'])}
+        if result is None:
+            raise Denied('Passkey verification failed')
+        return result
 
     def login_challenge(self, credential_id):
         # Native passkey picker supplies the credential ID. It is not a phone-based recovery route.

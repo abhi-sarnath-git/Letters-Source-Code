@@ -133,6 +133,7 @@ final class MessagingTests: XCTestCase {
                 mimeType: mime, duration: kind == .voiceNote ? 1 : nil)
             try await alice.sendAttachment(draft, roomID: roomID, recipients: [bobID])
             var attachment: ReceivedAttachment?, attachmentID: String?
+            var failureType = "No new encrypted media event"
             for _ in 0..<20 {
                 try await alice.syncOnce(); try await bob.syncOnce()
                 let page = try await api(base, "/_matrix/client/v3/rooms/\(escape(roomID))/messages?dir=b&limit=30", token: aliceSession.accessToken)
@@ -140,14 +141,20 @@ final class MessagingTests: XCTestCase {
                 let events = pageJSON["chunk"] as? [[String: Any]] ?? []
                 for item in events where item["type"] as? String == "m.room.encrypted" {
                     guard let id = item["event_id"] as? String, !seenEvents.contains(id) else { continue }
-                    if let received = try? await bob.readAttachment(eventID: id, roomID: roomID, recipients: [aliceID]), received.bytes == bytes {
-                        attachment = received; attachmentID = id; break
+                    do {
+                        let received = try await bob.readAttachment(eventID: id, roomID: roomID, recipients: [aliceID])
+                        if received.bytes == bytes { attachment = received; attachmentID = id; break }
+                        failureType = "Decrypted payload mismatch"
+                    } catch {
+                        // Report a type only: SDK error descriptions may contain media/session details.
+                        failureType = String(reflecting: Swift.type(of: error))
+                        if let error = error as? AttachmentError { failureType += ": " + String(describing: error) }
                     }
                 }
                 if attachment != nil { break }
                 try await Task.sleep(nanoseconds: 250_000_000)
             }
-            let received = try XCTUnwrap(attachment, "Recipient must decrypt \(kind.rawValue)")
+            let received = try XCTUnwrap(attachment, "Recipient must decrypt \(kind.rawValue): \(failureType)")
             let id = try XCTUnwrap(attachmentID); seenEvents.insert(id)
             XCTAssertEqual(received.kind, kind)
             XCTAssertEqual(received.bytes, bytes)
