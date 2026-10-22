@@ -285,11 +285,34 @@ struct LocalMediaPreview: View {
     }
 }
 
-// Decode a bounded frame set locally; never load remote HTML/scripts to display a GIF.
+// A zero-intrinsic-size container prevents decoded high-density frames from widening the entire sheet.
+final class GIFPreviewContainer:UIView {
+    let imageView=UIImageView()
+    override init(frame:CGRect) {
+        super.init(frame:frame)
+        clipsToBounds=true; imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints=false
+        imageView.setContentCompressionResistancePriority(.defaultLow,for:.horizontal)
+        addSubview(imageView)
+        NSLayoutConstraint.activate([imageView.leadingAnchor.constraint(equalTo:leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo:trailingAnchor),imageView.topAnchor.constraint(equalTo:topAnchor),
+            imageView.bottomAnchor.constraint(equalTo:bottomAnchor)])
+    }
+    required init?(coder:NSCoder) { fatalError("Storyboard initialization is unsupported") }
+}
+
+// Decode bounded frames locally; do not restart animation for unrelated view updates.
 struct GIFPreview: UIViewRepresentable {
     let bytes: Data
-    func makeUIView(context:Context) -> UIImageView { let view=UIImageView(); view.contentMode = .scaleAspectFit; return view }
-    func updateUIView(_ view:UIImageView,context:Context) {
+    final class Coordinator { var bytes:Data?; var reducedMotion:Bool? }
+    func makeCoordinator() -> Coordinator { Coordinator() }
+    func makeUIView(context:Context) -> GIFPreviewContainer { GIFPreviewContainer(frame:.zero) }
+    func updateUIView(_ container:GIFPreviewContainer,context:Context) {
+        let reduced=UIAccessibility.isReduceMotionEnabled
+        guard context.coordinator.bytes != bytes || context.coordinator.reducedMotion != reduced else { return }
+        context.coordinator.bytes=bytes; context.coordinator.reducedMotion=reduced
+        let view=container.imageView
+        view.stopAnimating(); view.animationImages=nil; view.image=nil
         guard let source=CGImageSourceCreateWithData(bytes as CFData,nil) else { return }
         var images:[UIImage]=[]; var pixels=0; var duration=0.0
         for index in 0..<min(CGImageSourceGetCount(source),120) {
@@ -297,13 +320,12 @@ struct GIFPreview: UIViewRepresentable {
                   let w=info[kCGImagePropertyPixelWidth] as? Int, let h=info[kCGImagePropertyPixelHeight] as? Int,
                   w > 0, h > 0, w <= 8192, h <= 8192, pixels+w*h <= 16000000,
                   let image=CGImageSourceCreateImageAtIndex(source,index,nil) else { break }
-            pixels += w*h; images.append(UIImage(cgImage:image))
+            pixels += w*h; images.append(UIImage(cgImage:image,scale:UIScreen.main.scale,orientation:.up))
             let gif=info[kCGImagePropertyGIFDictionary] as? [CFString:Any]
             duration += max(0.02,gif?[kCGImagePropertyGIFDelayTime] as? Double ?? 0.1)
         }
         view.image=images.first
-        if !UIAccessibility.isReduceMotionEnabled { view.animationImages=images; view.animationDuration=duration; view.startAnimating() }
-        else { view.stopAnimating(); view.animationImages=nil }
+        if !reduced { view.animationImages=images; view.animationDuration=duration; view.startAnimating() }
         view.accessibilityLabel="Locally imported GIF"
     }
 }
