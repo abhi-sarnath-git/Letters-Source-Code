@@ -233,6 +233,88 @@ public actor LettersMessagingClient {
         throw MessagingError.notText
     }
 
+    /// The room timeline encrypts BOTH uploaded bytes and the message containing the media key.
+    /// Generic Client.uploadMedia uploads plaintext and must never be used for private attachments.
+    /// Completion is an SDK send completion, not a recipient delivery/read acknowledgement.
+    public func sendAttachment(_ draft: EncryptedAttachmentDraft, roomID: String, recipients: Set<String>) async throws {
+        try beginOperation(); defer { endOperation() }
+        let room = try await guardedRoom(roomID, recipients: recipients)
+        let timeline = try await room.timeline()
+        // Re-check after timeline construction (an await); no upload occurs before this second guard.
+        _ = try await guardedRoom(roomID, recipients: recipients)
+        let size = UInt64(draft.bytes.count)
+        let attachment: AttachmentKind
+        switch draft.kind {
+        case .voiceNote:
+            attachment = .voice(audioInfo: AudioInfo(duration: draft.duration, size: size, mimetype: draft.mimeType), waveform: [])
+        case .image, .gif:
+            attachment = .image(imageInfo: ImageInfo(height: nil, width: nil, mimetype: draft.mimeType, size: size,
+                thumbnailInfo: nil, thumbnailSource: nil, blurhash: nil, isAnimated: draft.kind == .gif), thumbnailSource: nil)
+        case .video:
+            attachment = .video(videoInfo: VideoInfo(duration: draft.duration, height: nil, width: nil,
+                mimetype: draft.mimeType, size: size, thumbnailInfo: nil, thumbnailSource: nil, blurhash: nil), thumbnailSource: nil)
+        case .file:
+            attachment = .file(fileInfo: FileInfo(mimetype: draft.mimeType, size: size, thumbnailInfo: nil, thumbnailSource: nil))
+        }
+        let params = UploadParameters(source: .data(bytes: draft.bytes, filename: draft.filename),
+            caption: nil, formattedCaption: nil, mentions: nil, inReplyTo: nil)
+        let handle = try timeline.sendAttachment(params: params, attachment: attachment)
+        try await withTaskCancellationHandler(operation: {
+            try await handle.join()
+            try Task.checkCancellation()
+        }, onCancel: { handle.cancel() })
+    }
+
+    /// Read only a supported encrypted attachment in a still-approved encrypted room.
+    /// SDK verifies the attachment hash and decrypts it; no URL downloader bypass exists.
+    public func readAttachment(eventID: String, roomID: String, recipients: Set<String>) async throws -> ReceivedAttachment {
+        try beginOperation(); defer { endOperation() }
+        let sdk = try authenticated()
+        let room = try await guardedRoom(roomID, recipients: recipients)
+        let event = try await room.loadOrFetchEvent(eventId: eventID)
+        guard case let .messageLike(content) = try event.content(),
+              case let .roomMessage(type, _) = content else { throw AttachmentError.unsupportedEvent }
+        let source: MediaSource, name: String, mime: String, size: UInt64?, kind: AttachmentType
+        switch type {
+        case let .audio(c):
+            source = c.source; name = c.filename; mime = c.info?.mimetype ?? "application/octet-stream"
+            size = c.info?.size; kind = c.voice == nil ? .file : .voiceNote
+        case let .image(c):
+            source = c.source; name = c.filename; mime = c.info?.mimetype ?? "application/octet-stream"
+            size = c.info?.size; kind = mime == "image/gif" ? .gif : .image
+        case let .video(c):
+            source = c.source; name = c.filename; mime = c.info?.mimetype ?? "application/octet-stream"
+            size = c.info?.size; kind = .video
+        case let .file(c):
+            source = c.source; name = c.filename; mime = c.info?.mimetype ?? "application/octet-stream"
+            size = c.info?.size; kind = .file
+        default: throw AttachmentError.unsupportedEvent
+        }
+        guard let size, size > 0, size <= UInt64(EncryptedAttachmentDraft.maximumBytes) else { throw AttachmentError.tooLarge }
+        // Ruma serializes an encrypted MediaSource as the encrypted-file object. Fail closed on a plaintext URL.
+        guard let json = try JSONSerialization.jsonObject(with: Data(source.toJson().utf8)) as? [String: Any],
+              json["key"] is [String: Any], json["iv"] is String, json["hashes"] is [String: Any],
+              json["v"] as? String == "v2" else { throw AttachmentError.notEncrypted }
+        _ = try await guardedRoom(roomID, recipients: recipients)
+        let folder = root.appendingPathComponent("incoming-media", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        var privateFolder = folder
+        var values = URLResourceValues(); values.isExcludedFromBackup = true
+        try privateFolder.setResourceValues(values)
+        #if os(iOS)
+        try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: folder.path)
+        #endif
+        // No persistent plaintext SDK cache. The owning handle removes its file when released.
+        let file = try await sdk.getMediaFile(mediaSource: source, filename: nil, mimeType: mime, useCache: false, tempDir: folder.path)
+        let path = try file.path()
+        defer { _ = file }
+        let count = (try FileManager.default.attributesOfItem(atPath: path)[.size] as? NSNumber)?.intValue ?? 0
+        guard count > 0, count <= EncryptedAttachmentDraft.maximumBytes, count == Int(size) else { throw AttachmentError.tooLarge }
+        let data = try Data(contentsOf: URL(fileURLWithPath: path))
+        _ = try await guardedRoom(roomID, recipients: recipients)
+        return ReceivedAttachment(kind: kind, filename: name, mimeType: mime, bytes: data, encryptedMediaURL: source.url())
+    }
+
     /// Stops local access only. This does not revoke the device on the server.
     public func close() throws {
         try beginOperation(); defer { endOperation() }

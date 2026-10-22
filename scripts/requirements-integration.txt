@@ -1,2 +1,5 @@
 # Isolated hosted test server; not shipped in the iPhone application.
 matrix-synapse==1.163.0
+
+# Server passkey signature verification; SMS remains disabled.
+webauthn==3.0.1

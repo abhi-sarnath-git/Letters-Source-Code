@@ -7,6 +7,8 @@ struct PreviewMessage: Identifiable {
     var text: String
     let outgoing: Bool
     var sticker: PreviewSticker? = nil
+    var media: LocalMedia? = nil
+    var expiresAt: Date? = nil
 }
 
 struct PreviewConversation: Identifiable {
@@ -19,6 +21,7 @@ struct PreviewConversation: Identifiable {
     var messages: [PreviewMessage]
     var favorite = false
     var archived = false
+    var lifetime = MessageLifetime.never
     var lastMessage: String { messages.last?.text ?? "Start a conversation" }
 }
 
@@ -54,6 +57,7 @@ struct PreviewConversation: Identifiable {
 
     // Save the outgoing sample conversation state before loading another profile's separate contact view.
     func switchLetterboxProfile(_ id: String) {
+        purgeExpired()
         savedProfiles[letterbox.activeMemberID] = conversations
         do { try letterbox.selectProfile(id) } catch { return }
         conversations = savedProfiles[id] ?? []
@@ -84,7 +88,35 @@ struct PreviewConversation: Identifiable {
     func appendPreview(_ text: String, to id: String) {
         let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty, let index = conversations.firstIndex(where: { $0.id == id }) else { return }
-        conversations[index].messages.append(.init(text: cleaned, outgoing: true))
+        conversations[index].messages.append(.init(text: cleaned, outgoing: true, expiresAt: conversations[index].lifetime.expiry(after: Date())))
+    }
+
+    func appendMedia(_ media: LocalMedia, to id: String) {
+        guard let index = conversations.firstIndex(where: { $0.id == id }) else { return }
+        conversations[index].messages.append(.init(text: media.label + " · local preview", outgoing: true, media: media, expiresAt: conversations[index].lifetime.expiry(after: Date())))
+    }
+
+    func selfDestructNow(_ id: String) {
+        guard let index=conversations.firstIndex(where: { $0.id == id }) else { return }
+        conversations[index].messages.removeAll()
+        // Also remove the active profile's saved snapshot so switching cannot resurrect messages.
+        if let savedIndex=savedProfiles[letterbox.activeMemberID]?.firstIndex(where: { $0.id == id }) {
+            savedProfiles[letterbox.activeMemberID]?[savedIndex].messages.removeAll()
+        }
+    }
+
+    func setLifetime(_ lifetime: MessageLifetime, for id: String) {
+        guard let index=conversations.firstIndex(where: { $0.id == id }) else { return }
+        conversations[index].lifetime=lifetime
+    }
+    // Remove payloads from active and inactive local sample profiles, not just visible bubbles.
+    func purgeExpired(now: Date = Date()) {
+        for index in conversations.indices { conversations[index].messages.removeAll { MessageLifetime.hasExpired($0.expiresAt, at: now) } }
+        for key in Array(savedProfiles.keys) {
+            guard var chats=savedProfiles[key] else { continue }
+            for index in chats.indices { chats[index].messages.removeAll { MessageLifetime.hasExpired($0.expiresAt, at: now) } }
+            savedProfiles[key]=chats
+        }
     }
 
     func markRead(_ id: String) {
@@ -94,6 +126,6 @@ struct PreviewConversation: Identifiable {
 
     func appendSticker(_ sticker: PreviewSticker, to id: String) {
         guard let index = conversations.firstIndex(where: { $0.id == id }) else { return }
-        conversations[index].messages.append(.init(text: "Sticker: \(sticker.name)", outgoing: true, sticker: sticker))
+        conversations[index].messages.append(.init(text: "Sticker: \(sticker.name)", outgoing: true, sticker: sticker, expiresAt: conversations[index].lifetime.expiry(after: Date())))
     }
 }

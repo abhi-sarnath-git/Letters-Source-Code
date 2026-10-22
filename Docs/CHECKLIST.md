@@ -103,3 +103,22 @@ Finish app functionality before discussing deployment. Continue with the encrypt
 - [x] Inspect Indexes provider capture and four-section sample image (run 39687281594). S&P 500 is provider-restricted in the widget; its source link remains available.
 - [ ] Resolve embedded index quote availability; check every remaining catalogue instrument and interactive switching on a physical device.
 - [ ] Physical-device/VoiceOver/large-text/offline/provider-availability interaction QA.
+
+## Media, account access and self-destruct milestone
+
+- [x] Add local record/review/discard voice notes, protected temporary recording and background/interruption cancellation.
+- [x] Add local image/GIF/video/file import and bounded in-memory sample attachments.
+- [x] Add SDK encrypted attachment operations for five media kinds; no plaintext upload fallback.
+- [ ] Pass hosted independent-recipient media decryption/raw server ciphertext checks for all five types.
+- [x] Add disabled-by-default SMS registration boundary, invitation/OTP/passkey binding and native passkey ceremony adapter.
+- [x] Add local registration/biometric/passkey design surfaces with honest disabled states.
+- [ ] Pass hosted real WebAuthn signature/origin/UV/replay/counter verification tests.
+- [x] Add clock control and exact timer choices; local sample expiry and confirmed Self-Destruct Now.
+- [ ] Pass hosted timer tests and native compilation; inspect/publish individual feature captures.
+- [ ] Deploy account endpoints, configure a trusted passkey domain and SMS provider only after owner approval.
+- [ ] Replace legacy developer-only account creation entry points with enforced production invitation+phone+passkey policy.
+- [ ] Connect native account/chat screens to authenticated encrypted rooms and test on independent iPhones.
+- [ ] Implement cross-device expiry/redaction/media-retention cleanup before claiming remote self-destruction.
+- [ ] Complete privacy, recovery, codec playback, interruption, accessibility and protected-file cleanup review.
+
+See [ACCOUNT_AND_MEDIA.md](ACCOUNT_AND_MEDIA.md) for exact boundaries and remaining work. Per-feature portfolio images use fictional data and do not certify encrypted delivery or live account availability.

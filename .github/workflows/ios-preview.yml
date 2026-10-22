@@ -47,6 +47,10 @@ jobs:
         run: |
           python -m venv "$RUNNER_TEMP/letters-synapse-venv"
           "$RUNNER_TEMP/letters-synapse-venv/bin/python" -m pip install --disable-pip-version-check -r scripts/requirements-integration.txt
+      - name: Verify invitation phone and passkey account boundaries
+        env:
+          LETTERS_REQUIRE_PASSKEY_TESTS: "1"
+        run: '"$RUNNER_TEMP/letters-synapse-venv/bin/python" -m unittest discover -s server -p test_account_registration.py -v'
       # The harness uses synthetic accounts on loopback; secrets/databases are never artifacts.
       - name: Verify real encrypted messaging and server boundaries
         run: '"$RUNNER_TEMP/letters-synapse-venv/bin/python" scripts/test-encrypted-messaging.py'

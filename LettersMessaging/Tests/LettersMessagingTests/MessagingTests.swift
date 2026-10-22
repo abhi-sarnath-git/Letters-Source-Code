@@ -61,6 +61,17 @@ final class MessagingTests: XCTestCase {
         catch { XCTAssertEqual(error as? MessagingError, .noSession) }
     }
 
+    func testAttachmentPolicyRejectsUnsafeInputsAndBoundsVoiceDuration() throws {
+        let data = Data([1, 2, 3])
+        XCTAssertThrowsError(try EncryptedAttachmentDraft(kind: .file, bytes: data, filename: "../secret", mimeType: "text/plain"))
+        XCTAssertThrowsError(try EncryptedAttachmentDraft(kind: .gif, bytes: data, filename: "x.gif", mimeType: "image/jpeg"))
+        for duration in [0.0, 301.0, Double.nan, Double.infinity] {
+            XCTAssertThrowsError(try EncryptedAttachmentDraft(kind: .voiceNote, bytes: data, filename: "voice.m4a", mimeType: "audio/mp4", duration: duration))
+        }
+        XCTAssertThrowsError(try EncryptedAttachmentDraft(kind: .file, bytes: Data(), filename: "x", mimeType: "text/plain"))
+        XCTAssertThrowsError(try EncryptedAttachmentDraft(kind: .file, bytes: Data(count: EncryptedAttachmentDraft.maximumBytes + 1), filename: "x", mimeType: "application/octet-stream"))
+    }
+
     // The full test is mandatory in CI; ordinary package users can run the
     // deterministic tests without installing a homeserver.
     func testRealEncryptedExchangeAndServerBoundaries() async throws {
@@ -111,6 +122,48 @@ final class MessagingTests: XCTestCase {
         XCTAssertNotNil(content["ciphertext"])
         XCTAssertNil(content["body"])
         XCTAssertFalse(String(decoding: raw.data, as: UTF8.self).contains(body))
+        // Exercise all five encrypted media envelopes between independent client stores.
+        // Synthetic bytes verify transport, encryption and decryption, not media codec playback.
+        var seenEvents: Set<String> = [eventID]
+        for (kind, mime, ext) in [(AttachmentType.voiceNote, "audio/mp4", "m4a"),
+                                 (.image, "image/png", "png"), (.gif, "image/gif", "gif"),
+                                 (.video, "video/mp4", "mp4"), (.file, "application/pdf", "pdf")] {
+            let bytes = Data(("Synthetic private attachment \(kind.rawValue) \(UUID().uuidString)").utf8)
+            let draft = try EncryptedAttachmentDraft(kind: kind, bytes: bytes, filename: "synthetic." + ext,
+                mimeType: mime, duration: kind == .voiceNote ? 1 : nil)
+            try await alice.sendAttachment(draft, roomID: roomID, recipients: [bobID])
+            var attachment: ReceivedAttachment?, attachmentID: String?
+            for _ in 0..<20 {
+                try await alice.syncOnce(); try await bob.syncOnce()
+                let page = try await api(base, "/_matrix/client/v3/rooms/\(escape(roomID))/messages?dir=b&limit=30", token: aliceSession.accessToken)
+                let pageJSON = try XCTUnwrap(try JSONSerialization.jsonObject(with: page.data) as? [String: Any])
+                let events = pageJSON["chunk"] as? [[String: Any]] ?? []
+                for item in events where item["type"] as? String == "m.room.encrypted" {
+                    guard let id = item["event_id"] as? String, !seenEvents.contains(id) else { continue }
+                    if let received = try? await bob.readAttachment(eventID: id, roomID: roomID, recipients: [aliceID]), received.bytes == bytes {
+                        attachment = received; attachmentID = id; break
+                    }
+                }
+                if attachment != nil { break }
+                try await Task.sleep(nanoseconds: 250_000_000)
+            }
+            let received = try XCTUnwrap(attachment, "Recipient must decrypt \(kind.rawValue)")
+            let id = try XCTUnwrap(attachmentID); seenEvents.insert(id)
+            XCTAssertEqual(received.kind, kind)
+            XCTAssertEqual(received.bytes, bytes)
+            let envelope = try await api(base, "/_matrix/client/v3/rooms/\(escape(roomID))/event/\(escape(id))", token: aliceSession.accessToken)
+            XCTAssertFalse(String(decoding: envelope.data, as: UTF8.self).contains(draft.filename))
+            XCTAssertFalse(String(decoding: envelope.data, as: UTF8.self).contains("Synthetic private attachment"))
+            let locator = try XCTUnwrap(URL(string: received.encryptedMediaURL))
+            let server = try XCTUnwrap(locator.host)
+            let ciphertext = try await api(base, "/_matrix/client/v1/media/download/\(escape(server))\(locator.path)", token: aliceSession.accessToken)
+            XCTAssertEqual(ciphertext.status, 200)
+            XCTAssertNotEqual(ciphertext.data, bytes, "Uploaded media must be ciphertext, not merely a TLS upload")
+            XCTAssertFalse(ciphertext.data.range(of: bytes) != nil)
+            do { _ = try await outsider.readAttachment(eventID: id, roomID: roomID, recipients: [aliceID]); XCTFail("Outsider media read must fail") }
+            catch { XCTAssertEqual(error as? MessagingError, .roomNotJoined) }
+        }
+
         let denied = try await api(base, "/_matrix/client/v3/rooms/\(escape(roomID))/event/\(escape(eventID))", token: outsiderSession.accessToken)
         // Synapse deliberately hides private event existence from outsiders.
         XCTAssertEqual(denied.status, 404)

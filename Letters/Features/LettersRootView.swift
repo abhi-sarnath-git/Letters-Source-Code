@@ -3,8 +3,14 @@
 import SwiftUI
 
 struct LettersRootView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var store = PreviewStore()
-    @State private var selectedTab = ProcessInfo.processInfo.arguments.contains("--preview-alert-all") ? 3 : 0
+    @State private var previewTimer = ProcessInfo.processInfo.arguments.contains("--preview-timer")
+    @State private var timerFixture = MessageLifetime.day
+    @State private var previewMedia = ProcessInfo.processInfo.arguments.contains { $0.hasPrefix("--preview-media=") }
+    @State private var previewStickers = ProcessInfo.processInfo.arguments.contains("--preview-stickers")
+    @State private var previewAccount = ProcessInfo.processInfo.arguments.contains("--preview-registration") || ProcessInfo.processInfo.arguments.contains("--preview-passkey")
+    @State private var selectedTab = ProcessInfo.processInfo.arguments.contains("--preview-alert-all") ? 3 : ProcessInfo.processInfo.arguments.contains("--preview-calls") ? 2 : 0
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -18,19 +24,35 @@ struct LettersRootView: View {
         }
         .tint(LettersTheme.accent)
         .environmentObject(store)
+        .sheet(isPresented: $previewTimer) { MessageTimerView(selection: $timerFixture) }
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            while !Task.isCancelled {
+                store.purgeExpired()
+                do { try await Task.sleep(nanoseconds: 1_000_000_000) } catch { break }
+            }
+        }
+        .sheet(isPresented: $previewMedia) { MediaComposerView { _ in }.environmentObject(store) }
+        .sheet(isPresented: $previewStickers) { StickerPickerView { _ in }.environmentObject(store) }
+        .sheet(isPresented: $previewAccount) { NavigationStack { AccountAccessView() } }
     }
 }
 
 struct ConversationListView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Binding var selectedTab: Int
-    @State private var newsCategory = WorldNewsCategory.world
+    @State private var newsCategory: WorldNewsCategory = {
+        let arg = ProcessInfo.processInfo.arguments.first { $0.hasPrefix("--preview-news=") }
+        let topic = arg.map { String($0.dropFirst("--preview-news=".count)) } ?? "world"
+        return topic == "stocks" ? .stocks : topic == "oil" ? .oil : topic == "crypto" ? .crypto : .world
+    }()
     @State private var runnerPaused = false
     @EnvironmentObject private var store: PreviewStore
     @State private var search = ""
     @State private var filter = "All"
     @State private var showInviteInfo = ProcessInfo.processInfo.arguments.contains("--preview-letterbox")
     @State private var showMarkets = ProcessInfo.processInfo.arguments.contains("--preview-markets") || ProcessInfo.processInfo.arguments.contains("--check-market-quotes")
+    @State private var showTimerChat = ProcessInfo.processInfo.arguments.contains("--preview-chat-timer") || ProcessInfo.processInfo.arguments.contains("--preview-destruct-now")
     private let filters = ["All", "Unread", "Favorites", "Groups"]
 
     private var visibleConversations: [PreviewConversation] {
@@ -149,6 +171,7 @@ struct ConversationListView: View {
             .background(OrbitBackdrop()).toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: String.self) { ChatPreviewView(conversationID: $0) }
             // Markets is reached from the Home menu only; the bottom tabs stay unchanged.
+            .navigationDestination(isPresented: $showTimerChat) { ChatPreviewView(conversationID: "maya") }
             .navigationDestination(isPresented: $showMarkets) { MarketsView() }
             .sheet(isPresented: $showInviteInfo) {
                 LetterboxView(screenshotMode: ProcessInfo.processInfo.arguments.contains("--preview-letterbox"))
@@ -171,6 +194,8 @@ struct ChatPreviewView: View {
     let conversationID: String
     @EnvironmentObject private var store: PreviewStore
     @State private var draft = ""
+    @State private var destructConfirmation = false
+    @State private var showTimer = false
     @State private var showFeatureInfo = false
     @State private var showStickers = false
     @State private var callDraft: CallDraft?
@@ -189,11 +214,14 @@ struct ChatPreviewView: View {
                             HStack {
                                 if message.outgoing { Spacer(minLength: 40) }
                                 VStack(alignment: .trailing, spacing: 7) {
-                                    if let sticker = message.sticker {
+                                    if let media = message.media {
+                                        LocalMediaPreview(media: media)
+                                    } else if let sticker = message.sticker {
                                         StickerArtwork(sticker: sticker).frame(width: 112, height: 112)
                                     } else {
                                         Text(message.text).frame(maxWidth: .infinity, alignment: .leading)
                                     }
+                                    if message.expiresAt != nil { Label("Timed locally", systemImage: "timer").font(.caption2) }
                                     if message.outgoing { Text("Local preview").font(.caption2).opacity(0.75) }
                                 }
                                 .padding(16)
@@ -211,7 +239,7 @@ struct ChatPreviewView: View {
             }
             HStack(alignment: .bottom, spacing: 10) {
                 Button { showFeatureInfo = true } label: { Image(systemName: "plus").frame(width: 44, height: 44) }
-                    .accessibilityLabel("Attachment preview information")
+                    .accessibilityLabel("Prepare a local voice note, GIF, photo, video or file")
                 TextField("Try a sample message", text: $draft, axis: .vertical)
                     .lineLimit(1...5).padding(13).background(LettersTheme.surface, in: RoundedRectangle(cornerRadius: 18))
                     .accessibilityLabel("Sample message")
@@ -237,9 +265,30 @@ struct ChatPreviewView: View {
                         Image(systemName: "phone")
                     }.accessibilityLabel("Preview voice call with \(contact.name)")
                 }
+                Menu {
+                    Button { showTimer = true } label: { Label("Set timer", systemImage: "timer") }
+                    Text("New messages: " + (chat?.lifetime.rawValue ?? "never"))
+                    Button(role: .destructive) { destructConfirmation = true } label: { Label("Self-Destruct Now", systemImage: "flame") }
+                } label: {
+                    Image(systemName: "clock").font(.system(size: 18, weight: .semibold))
+                        .frame(width: 38, height: 38).foregroundStyle(LettersTheme.accent)
+                        .background(LettersTheme.surface, in: Circle())
+                        .overlay(Circle().stroke(LettersTheme.accent.opacity(0.5), lineWidth: 1))
+                }.accessibilityLabel("Message timer and Self-Destruct Now")
             }
         }
-        .onAppear { store.markRead(conversationID) }
+        .onAppear {
+            store.markRead(conversationID)
+            if ProcessInfo.processInfo.arguments.contains("--preview-destruct-now") {
+                DispatchQueue.main.async { destructConfirmation = true }
+            }
+        }
+        .confirmationDialog("Self-destruct this local chat now?", isPresented: $destructConfirmation, titleVisibility: .visible) {
+            Button("Self-Destruct Now", role: .destructive) { store.selfDestructNow(conversationID) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Clears this sample chat's local messages and attachments. It does not delete another person's copies or server data. Your contact and timer setting remain.")
+        }
         .fullScreenCover(item: $callDraft) { CallPreparationView(draft: $0) }
         .sheet(isPresented: $showStickers) {
             StickerPickerView { sticker in
@@ -247,9 +296,11 @@ struct ChatPreviewView: View {
                 showStickers = false
             }.presentationDetents([.medium, .large])
         }
+        .sheet(isPresented: $showTimer) {
+            MessageTimerView(selection: Binding(get: { chat?.lifetime ?? .never }, set: { store.setLifetime($0, for: conversationID) }))
+        }
         .sheet(isPresented: $showFeatureInfo) {
-            PreviewExplanation(title: "Part of the Letters roadmap", icon: "sparkles",
-                detail: "Encrypted voice calls and attachments are required for Letters. These controls show the intended experience; they do not place calls, capture media, or send files yet.")
+            MediaComposerView { media in store.appendMedia(media, to: conversationID) }
         }
     }
 }
@@ -293,6 +344,9 @@ struct LettersSettingsView: View {
                     Label("Membership by invitation", systemImage: "person.badge.key")
                     Label("End-to-end encryption required", systemImage: "lock.shield")
                     Label("Device verification and recovery", systemImage: "key")
+                }
+                Section("Account access") {
+                    NavigationLink { AccountAccessView() } label: { Label("Invitation, phone & passkey", systemImage: "person.badge.key") }
                 }
                 Section("Messaging development") {
                     NavigationLink { MessagingFoundationView() } label: {

@@ -58,3 +58,30 @@ xcrun simctl terminate "$preview_device" com.example.letters
 xcrun simctl launch "$preview_device" com.example.letters --preview-markets --preview-world-pulse --market-indexes
 sleep 4
 xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-market-indexes.png"
+
+# Separate actual-native portfolio captures for every new media surface and existing unique feature.
+# All media fixtures, account numbers and news/market values are visibly fictional.
+for media_kind in voiceNote image gif video file; do
+  xcrun simctl terminate "$preview_device" com.example.letters || true
+  xcrun simctl launch "$preview_device" com.example.letters --preview-world-pulse "--preview-media=$media_kind"
+  sleep 4
+  xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-media-$media_kind.png"
+done
+for account_screen in registration passkey calls stickers timer chat-timer destruct-now; do
+  xcrun simctl terminate "$preview_device" com.example.letters || true
+  xcrun simctl launch "$preview_device" com.example.letters --preview-world-pulse "--preview-$account_screen"
+  sleep 4
+  xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-$account_screen.png"
+done
+for news_topic in stocks oil crypto; do
+  xcrun simctl terminate "$preview_device" com.example.letters || true
+  xcrun simctl launch "$preview_device" com.example.letters --preview-world-pulse "--preview-news=$news_topic"
+  sleep 4
+  xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-news-$news_topic.png"
+done
+for market_topic in oil bitcoin; do
+  xcrun simctl terminate "$preview_device" com.example.letters || true
+  xcrun simctl launch "$preview_device" com.example.letters --preview-world-pulse --preview-markets "--market-$market_topic"
+  sleep 4
+  xcrun simctl io "$preview_device" screenshot "$RUNNER_TEMP/letters-preview/letters-market-$market_topic-sample.png"
+done

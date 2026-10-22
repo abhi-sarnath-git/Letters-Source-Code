@@ -96,3 +96,7 @@ Track progress in [the project checklist](Docs/CHECKLIST.md). See `Docs/FEATURE_
 - Swift bindings: https://github.com/matrix-org/matrix-rust-components-swift
 
 No Element application source has been copied. The pinned SDK's Apache license is retained in Docs/ThirdParty; a full transitive dependency notice inventory remains a release gate. Present Letters in a portfolio as original product/UI work using an established messaging SDK, with the actual implementation status clearly stated.
+
+## Media and account-access development
+
+Sample chats now prepare voice notes, GIFs, photos, videos and files, and expose a futuristic clock menu for local timer settings and confirmed Self-Destruct Now. A separate SDK boundary implements encrypted attachment operations. Invitation+phone OTP+passkey registration is a development boundary with SMS disabled; native account actions are labelled unavailable. Read [implementation and security limits](Docs/ACCOUNT_AND_MEDIA.md) before interpreting portfolio screens as live messaging or account support.
