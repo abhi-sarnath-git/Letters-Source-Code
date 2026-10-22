@@ -2,7 +2,7 @@
 
 ## Implementation status
 
-The app is still a portfolio prototype, not a released private messenger. The native composer remains disconnected from authenticated rooms. The development SDK boundary now includes encrypted attachment sending/reading for voice notes, images, GIFs, videos and files. Its hosted test must prove recipient decryption and server-side ciphertext independently of the UI. Synthetic envelope bytes test transport, not every codec's playback.
+The app is still a portfolio prototype, not a released private messenger. The sample composer stays local. A separate Debug-only native development chat now connects text and media operations to explicitly configured synthetic accounts; see [development setup](DEVELOPMENT_CHAT.md). It is not a deployed family service. The development SDK boundary now includes encrypted attachment sending/reading for voice notes, images, GIFs, videos and files. Its hosted test must prove recipient decryption and server-side ciphertext independently of the UI. Synthetic envelope bytes test transport, not every codec's playback.
 
 ## Media preparation
 

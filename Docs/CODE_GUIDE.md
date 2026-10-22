@@ -14,6 +14,7 @@ Keep comments next to the code they explain. Describe why a guard, transaction o
 | Real admission/invites/contact edges | `server/letterbox_service.py` | Authentication and transactions enforce boundaries; no live room is created by `direct()` |
 | Approved member to Matrix device | `server/letters_synapse_auth.py`, `LetterboxLoginGrant.swift` | One-use login grants are separate from invitation QR codes and device access tokens |
 | Crypto, session restore and sends | `LettersMessaging/.../LettersMessagingClient.swift`, `SessionVault.swift` | SDK encryption and Keychain policy are separate from membership approval |
+| Native encrypted development chat | `DevelopmentChatView.swift`, `ConversationSnapshot.swift` | Manual synthetic-account setup; SDK history trust warnings and audience guards fail closed; no production contact approval claim |
 | Public headlines/animation | `WorldPulseView.swift`, `LettersCore/.../WorldNews.swift` | Public news has no chat secrets; cached/offline state is explicit |
 | Alert All and voice preparation | `AlertAllView.swift`, `LettersCallsView.swift` | Rehearsals/preparation do not notify or call anyone |
 | Hosted verification | `.github/workflows/ios-preview.yml`, `scripts/test-encrypted-messaging.py` | Synthetic server tests and simulator captures are not real-iPhone QA |

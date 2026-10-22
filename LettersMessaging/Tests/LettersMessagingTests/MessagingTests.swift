@@ -243,6 +243,10 @@ final class MessagingTests: XCTestCase {
         XCTAssertTrue(discovered.contains(where: { $0.id == eventID && $0.body == body }))
         XCTAssertEqual(Set(discovered.map(\.id)).count, discovered.count)
         XCTAssertFalse(discovered.contains(where: { $0.id == injectedID }))
+        do { _ = try await alice.readText(eventID: injectedID, roomID: roomID, recipients: [bobID]); XCTFail("Event-ID reads must also reject cleartext") }
+        catch { XCTAssertEqual(error as? MessagingError, .encryptionUnavailable) }
+        do { _ = try await alice.readAttachment(eventID: injectedID, roomID: roomID, recipients: [bobID]); XCTFail("Attachment reads must reject a cleartext outer event") }
+        catch { XCTAssertEqual(error as? MessagingError, .encryptionUnavailable) }
         XCTAssertTrue(discovered.contains(where: { $0.id == replyID && $0.body == reply && !$0.isOwn }))
         do { _ = try await alice.conversation(roomID: roomID, recipients: ["@outsider:letters.test"]); XCTFail("History must refuse an unexpected audience") }
         catch { XCTAssertEqual(error as? MessagingError, .recipientsChanged) }

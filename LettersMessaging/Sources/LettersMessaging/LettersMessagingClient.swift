@@ -232,19 +232,20 @@ public actor LettersMessagingClient {
     public func readText(eventID: String, roomID: String, recipients: Set<String>) async throws -> String {
         try beginOperation(); defer { endOperation() }
         let room = try await guardedRoom(roomID, recipients: recipients)
+        try await requireTrustedEvent(eventID, room: room, roomID: roomID, recipients: recipients)
         let event = try await room.loadOrFetchEvent(eventId: eventID)
         if case let .messageLike(content) = try event.content(),
            case let .roomMessage(type, _) = content,
-           case let .text(text) = type { return text.body }
+           case let .text(text) = type {
+            _ = try await guardedRoom(roomID, recipients: recipients)
+            return text.body
+        }
         throw MessagingError.notText
     }
 
-    /// Foreground development history. Only server-acknowledged messages are shown.
-    /// Every refresh checks the current audience before and after decrypting; this
-    /// is still a client guard, not the production Letterbox room policy.
-    public func conversation(roomID: String, recipients: Set<String>) async throws -> [ConversationMessage] {
-        try beginOperation(); defer { endOperation() }
-        let room = try await guardedRoom(roomID, recipients: recipients)
+    /// Retain one listener for the currently selected room. Plaintext/unsafe events
+    /// are never trusted just because their containing room has encryption enabled.
+    private func snapshot(for room: Room, roomID: String) async throws -> ConversationSnapshot {
         if observedRoom?.id != roomID {
             stopObserving()
             let timeline = try await room.timeline()
@@ -255,10 +256,31 @@ public actor LettersMessagingClient {
             catch { stopObserving(); throw error }
         }
         guard let observation = observedRoom else { throw MessagingError.invalidSession }
+        return observation.snapshot
+    }
+
+    private func requireTrustedEvent(_ id: String, room: Room, roomID: String, recipients: Set<String>) async throws {
+        let snapshot = try await snapshot(for: room, roomID: roomID)
+        let senders = recipients.union([try authenticated().userId()])
+        guard try snapshot.events().contains(where: { item in
+            guard item.isRemote, senders.contains(item.sender), case let .eventId(eventID) = item.eventOrTransactionId,
+                  eventID == id else { return false }
+            return ConversationSnapshot.permitsDevelopmentDisplay(item.lazyProvider.getShields(strict: true))
+        }) else { throw MessagingError.encryptionUnavailable }
+    }
+
+    /// Foreground development history. Only server-acknowledged messages are shown.
+    /// Every refresh checks the current audience before and after decrypting; this
+    /// is still a client guard, not the production Letterbox room policy.
+    public func conversation(roomID: String, recipients: Set<String>) async throws -> [ConversationMessage] {
+        try beginOperation(); defer { endOperation() }
+        let room = try await guardedRoom(roomID, recipients: recipients)
+        let snapshot = try await snapshot(for: room, roomID: roomID)
+        let permittedSenders = recipients.union([try authenticated().userId()])
         var messages: [ConversationMessage] = []
         var seen = Set<String>()
-        for item in try observation.snapshot.events() {
-            guard item.isRemote, case let .eventId(id) = item.eventOrTransactionId,
+        for item in try snapshot.events() {
+            guard item.isRemote, permittedSenders.contains(item.sender), case let .eventId(id) = item.eventOrTransactionId,
                   item.eventTypeRaw == "m.room.message" || item.eventTypeRaw == "m.room.encrypted",
                   seen.insert(id).inserted,
                   ConversationSnapshot.permitsDevelopmentDisplay(item.lazyProvider.getShields(strict: true)) else { continue }
@@ -323,6 +345,7 @@ public actor LettersMessagingClient {
         try beginOperation(); defer { endOperation() }
         let sdk = try authenticated()
         let room = try await guardedRoom(roomID, recipients: recipients)
+        try await requireTrustedEvent(eventID, room: room, roomID: roomID, recipients: recipients)
         let event = try await room.loadOrFetchEvent(eventId: eventID)
         guard case let .messageLike(content) = try event.content(),
               case let .roomMessage(type, _) = content else { throw AttachmentError.unsupportedEvent }
