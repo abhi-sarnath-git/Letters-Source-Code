@@ -209,6 +209,17 @@ final class MessagingTests: XCTestCase {
         try await alice.restore()
         let restoredDevice = try await alice.deviceID()
         XCTAssertEqual(restoredDevice, originalDevice, "Restore must preserve device identity")
+        // The native history path must discover messages without manually supplying event IDs.
+        var discovered: [ConversationMessage] = []
+        for _ in 0..<8 {
+            try await alice.syncOnce()
+            discovered = try await alice.conversation(roomID: roomID, recipients: [bobID])
+            if discovered.contains(where: { $0.id == eventID && $0.body == body }) { break }
+            try await Task.sleep(nanoseconds: 300_000_000)
+        }
+        XCTAssertTrue(discovered.contains(where: { $0.id == eventID && $0.body == body }))
+        XCTAssertEqual(Set(discovered.map(\.id)).count, discovered.count)
+
         let restoredText = try await alice.readText(eventID: eventID, roomID: roomID, recipients: [bobID])
         XCTAssertEqual(restoredText, body)
         try await alice.signOut(); try await bob.signOut(); try await outsider.signOut()

@@ -22,6 +22,12 @@ public actor LettersMessagingClient {
     private var client: Client?
     private var sessionDelegate: SessionDelegate?
     private var operationInProgress = false
+    private var observedRoom: (id: String, timeline: Timeline, snapshot: ConversationSnapshot, handle: TaskHandle)?
+
+    private func stopObserving() {
+        observedRoom?.handle.cancel()
+        observedRoom = nil
+    }
     // Actors can re-enter at await. This gate keeps logout, sync and send from overlapping.
     private func beginOperation() throws {
         guard !operationInProgress else { throw MessagingError.operationInProgress }
@@ -233,6 +239,41 @@ public actor LettersMessagingClient {
         throw MessagingError.notText
     }
 
+    /// Foreground development history. Only server-acknowledged messages are shown.
+    /// Every refresh checks the current audience before and after decrypting; this
+    /// is still a client guard, not the production Letterbox room policy.
+    public func conversation(roomID: String, recipients: Set<String>) async throws -> [ConversationMessage] {
+        try beginOperation(); defer { endOperation() }
+        let room = try await guardedRoom(roomID, recipients: recipients)
+        if observedRoom?.id != roomID {
+            stopObserving()
+            let timeline = try await room.timeline()
+            let snapshot = ConversationSnapshot()
+            let handle = await timeline.addListener(listener: snapshot)
+            observedRoom = (roomID, timeline, snapshot, handle)
+            do { _ = try await timeline.paginateBackwards(numEvents: 50) }
+            catch { stopObserving(); throw error }
+        }
+        guard let observation = observedRoom else { throw MessagingError.invalidSession }
+        var messages: [ConversationMessage] = []
+        var seen = Set<String>()
+        for item in try observation.snapshot.events() {
+            guard item.isRemote, case let .eventId(id) = item.eventOrTransactionId,
+                  item.eventTypeRaw == "m.room.message" || item.eventTypeRaw == "m.room.encrypted",
+                  seen.insert(id).inserted else { continue }
+            // Fetch through the existing trusted SDK event API rather than rendering
+            // raw timeline content or falling back to plaintext on decryption failure.
+            let event = try await room.loadOrFetchEvent(eventId: id)
+            var body: String?
+            if case let .messageLike(content) = try event.content(),
+               case let .roomMessage(type, _) = content,
+               case let .text(text) = type { body = text.body }
+            messages.append(ConversationMessage(id: id, sender: item.sender, body: body, isOwn: item.isOwn))
+        }
+        _ = try await guardedRoom(roomID, recipients: recipients)
+        return messages
+    }
+
     /// The room timeline encrypts BOTH uploaded bytes and the message containing the media key.
     /// Generic Client.uploadMedia uploads plaintext and must never be used for private attachments.
     /// Returns a server event ID, never a recipient delivery/read acknowledgement.
@@ -329,6 +370,7 @@ public actor LettersMessagingClient {
     /// Stops local access only. This does not revoke the device on the server.
     public func close() throws {
         try beginOperation(); defer { endOperation() }
+        stopObserving()
         client = nil; sessionDelegate = nil
     }
 
@@ -336,6 +378,7 @@ public actor LettersMessagingClient {
         try beginOperation(); defer { endOperation() }
         let sdk = try authenticated()
         try await sdk.logout() // Keep credentials on failure so revocation can be retried.
+        stopObserving()
         client = nil; sessionDelegate = nil
         try vault.remove()
         // Retain encrypted files for now; deletion/recovery UX is a release gate.

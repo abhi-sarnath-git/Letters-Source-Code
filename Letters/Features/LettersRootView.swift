@@ -349,6 +349,11 @@ struct LettersSettingsView: View {
                     NavigationLink { AccountAccessView() } label: { Label("Invitation, phone & passkey", systemImage: "person.badge.key") }
                 }
                 Section("Messaging development") {
+                    #if DEBUG
+                    NavigationLink { DevelopmentChatView() } label: {
+                        Label("Encrypted development chat", systemImage: "bubble.left.and.bubble.right")
+                    }
+                    #endif
                     NavigationLink { MessagingFoundationView() } label: {
                         Label("Encrypted messaging progress", systemImage: "lock.shield")
                     }
