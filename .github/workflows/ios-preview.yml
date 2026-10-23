@@ -51,6 +51,8 @@ jobs:
         env:
           LETTERS_REQUIRE_PASSKEY_TESTS: "1"
         run: '"$RUNNER_TEMP/letters-synapse-venv/bin/python" -m unittest discover -s server -p test_account_registration.py -v'
+      - name: Verify server-enforced room permissions
+        run: '"$RUNNER_TEMP/letters-synapse-venv/bin/python" scripts/test-encrypted-messaging.py --room-policy-only'
       - name: Build unsigned iPhone simulator preview
         run: >-
           xcodebuild -project Letters.xcodeproj -scheme Letters

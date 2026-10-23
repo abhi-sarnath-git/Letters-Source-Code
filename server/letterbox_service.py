@@ -202,6 +202,43 @@ class LetterboxService:
             raise Denied('Messaging connection unavailable')
         return '@letters_' + uuid.UUID(member_id).hex + ':' + self.matrix_server_name
 
+    def matrix_room_audience(self, token, *, contact_id=None, group_id=None):
+        """Resolve an authenticated conversation's audience from admission data.
+
+        Callers choose a contact OR group identifier, never a list of Matrix IDs.
+        This is an authorization query, not permission to create an arbitrary
+        Matrix room: the homeserver must independently enforce the same policy.
+        """
+        if (contact_id is None) == (group_id is None):
+            raise Denied('Choose one conversation')
+        if self.matrix_server_name is None:
+            raise Denied('Messaging connection unavailable')
+        with self.db() as c:
+            own = self._auth(c, token)['id']
+            if contact_id is not None:
+                if not isinstance(contact_id, str) or own == contact_id:
+                    raise Denied('Approved contact required')
+                a, b = sorted([own, contact_id])
+                edge = c.execute(
+                    'SELECT 1 FROM contacts WHERE a=? AND b=?', (a, b)).fetchone()
+                active = c.execute(
+                    'SELECT 1 FROM members WHERE id=? AND active=1', (contact_id,)).fetchone()
+                if edge is None or active is None:
+                    raise Denied('Approved contact required')
+                members = [own, contact_id]
+            else:
+                if not isinstance(group_id, str) or not c.execute(
+                    'SELECT 1 FROM group_members WHERE group_id=? AND member=?',
+                    (group_id, own)).fetchone():
+                    raise Denied('Group unavailable')
+                # Removed accounts never remain in a newly resolved audience.
+                members = [r['member'] for r in c.execute(
+                    'SELECT gm.member FROM group_members gm JOIN members m ON m.id=gm.member '
+                    'WHERE gm.group_id=? AND m.active=1 ORDER BY gm.member', (group_id,))]
+            return {'own_user_id': self.matrix_user_id(own),
+                    'recipient_user_ids': sorted(self.matrix_user_id(member)
+                                                 for member in members if member != own)}
+
     def issue_matrix_login(self, token):
         """Return a 60-second sign-in grant once; persist only its SHA-256 hash."""
         if self.matrix_server_name is None:

@@ -19,6 +19,32 @@ class MatrixAdmissionTests(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    def test_room_audience_requires_personal_contact_and_current_session(self):
+        token = self.friend['session_token']
+        result = self.service.matrix_room_audience(token, contact_id=self.owner['member_id'])
+        self.assertEqual(result['recipient_user_ids'],
+                         [self.service.matrix_user_id(self.owner['member_id'])])
+        invitation = self.service.issue(self.owner['session_token'])
+        other = self.service.redeem(invitation['code'], 'Separate contact')
+        # Sharing an inviter does not make two people each other's contacts.
+        with self.assertRaises(Denied):
+            self.service.matrix_room_audience(token, contact_id=other['member_id'])
+        for kwargs in ({}, {'contact_id': self.owner['member_id'], 'group_id': 'x'},
+                       {'contact_id': self.friend['member_id']}, {'group_id': 'unknown'}):
+            with self.assertRaises(Denied): self.service.matrix_room_audience(token, **kwargs)
+        with self.assertRaises(Denied):
+            self.service.matrix_room_audience('invalid', contact_id=self.owner['member_id'])
+        self.service.deactivate(self.owner['session_token'], self.friend['member_id'])
+        with self.assertRaises(Denied):
+            self.service.matrix_room_audience(token, contact_id=self.owner['member_id'])
+
+    def test_group_audience_is_member_only_and_not_the_contact_directory(self):
+        group = self.service.create_group(self.owner['session_token'], 'Synthetic group')
+        own = self.service.matrix_room_audience(self.owner['session_token'], group_id=group['id'])
+        self.assertEqual(own['recipient_user_ids'], [])
+        with self.assertRaises(Denied):
+            self.service.matrix_room_audience(self.friend['session_token'], group_id=group['id'])
+
     def test_grant_is_hashed_bound_to_account_and_single_use(self):
         grant = self.service.issue_matrix_login(self.friend['session_token'])
         self.assertNotIn(grant['login_grant'].encode(), self.path.read_bytes())

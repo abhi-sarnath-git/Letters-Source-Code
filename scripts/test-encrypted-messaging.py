@@ -21,12 +21,12 @@ from letterbox_service import LetterboxService
 from synapse.api.errors import Codes
 
 
-def request(base, path, data=None, token=None):
+def request(base, path, data=None, token=None, method=None):
     """Return HTTP status/body without echoing request credentials or server logs."""
     headers = {'Content-Type': 'application/json'}
     if token:
         headers['Authorization'] = 'Bearer ' + token
-    req = urllib.request.Request(base + path, data=None if data is None else json.dumps(data).encode(), headers=headers)
+    req = urllib.request.Request(base + path, data=None if data is None else json.dumps(data).encode(), headers=headers, method=method)
     try:
         response = urllib.request.urlopen(req, timeout=10)
     except urllib.error.HTTPError as error:
@@ -78,7 +78,11 @@ def main():
                          'failed_attempts': {'per_second': 100, 'burst_count': 100}},
             'rc_message': {'per_second': 100, 'burst_count': 100},
         }
-        config_path = root/'homeserver.yaml'
+        policy_only = '--room-policy-only' in sys.argv
+        if policy_only:
+            config['modules'].append({'module': 'letters_room_enforcement.LettersRoomEnforcement',
+                                      'config': {'admission_database': str(root/'admission.sqlite3')}})
+        config_path = root/'homeserver.yaml' 
         config_path.write_text(json.dumps(config)); config_path.chmod(0o600)
         env = dict(os.environ, PYTHONPATH=str(SERVER_SOURCE))
         with (root/'synapse.log').open('wb') as log:
@@ -97,6 +101,38 @@ def main():
                     time.sleep(.5)
                 else:
                     raise RuntimeError('Isolated homeserver did not become ready')
+                if policy_only:
+                    accounts = {name: login(base, admission.issue_matrix_login(member['session_token']), 200)
+                                for name, member in members.items() if name in ('alice', 'bob', 'outsider')}
+                    alice, bob, outsider = [accounts[name] for name in ('alice', 'bob', 'outsider')]
+                    def expect(status, wanted, label):
+                        if status != wanted:
+                            raise RuntimeError(label + ': unexpected status ' + str(status))
+                    status, created = request(base, '/_matrix/client/v3/createRoom',
+                        {'preset': 'private_chat', 'invite': [bob['user_id']]}, alice['access_token'])
+                    expect(status, 200, 'Approved direct room')
+                    room = created['room_id']
+                    status, encryption = request(base, '/_matrix/client/v3/rooms/'+room+'/state/m.room.encryption',
+                                                 token=alice['access_token'])
+                    expect(status, 200, 'Encryption state')
+                    if encryption.get('algorithm') != 'm.megolm.v1.aes-sha2':
+                        raise RuntimeError('Required encryption missing')
+                    status, _ = request(base, '/_matrix/client/v3/join/'+room, {}, bob['access_token'])
+                    expect(status, 200, 'Approved invited join')
+                    status, _ = request(base, '/_matrix/client/v3/rooms/'+room+'/invite',
+                                        {'user_id': outsider['user_id']}, alice['access_token'])
+                    expect(status, 403, 'Audience expansion')
+                    status, _ = request(base, '/_matrix/client/v3/createRoom',
+                        {'invite': [outsider['user_id']]}, bob['access_token'])
+                    expect(status, 403, 'Noncontact room')
+                    status, _ = request(base, '/_matrix/client/v3/rooms/'+room+'/send/m.room.message/policy-test',
+                        {'msgtype': 'm.text', 'body': 'Synthetic rejected plaintext'}, alice['access_token'], 'PUT')
+                    expect(status, 403, 'Plaintext send')
+                    status, _ = request(base, '/_matrix/client/v3/rooms/'+room+'/state/m.room.join_rules',
+                        {'join_rule': 'public'}, alice['access_token'], 'PUT')
+                    expect(status, 403, 'Public join downgrade')
+                    print('Real Synapse room creation/contact/invite/encryption/plaintext boundaries passed.', flush=True)
+                    return
                 # Build first: one-use grants must not expire during SDK compilation.
                 subprocess.run(['swift', 'build', '--build-tests', '--package-path', 'LettersMessaging'], check=True, timeout=600)
                 probe_member = members['probe']
