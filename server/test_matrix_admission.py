@@ -45,6 +45,17 @@ class MatrixAdmissionTests(unittest.TestCase):
         with self.assertRaises(Denied):
             self.service.matrix_room_audience(self.friend['session_token'], group_id=group['id'])
 
+    def test_account_restore_and_signout_revoke_only_current_session(self):
+        token = self.friend['session_token']
+        account = self.service.account(token)
+        self.assertEqual(account['member_id'], self.friend['member_id'])
+        self.assertNotIn('session_token', account)
+        grant = self.service.issue_matrix_login(token)
+        self.assertTrue(self.service.sign_out(token)['signed_out'])
+        with self.assertRaises(Denied): self.service.account(token)
+        with self.assertRaises(Denied): self.service.consume_matrix_login(grant['user_id'], grant['login_grant'])
+        self.assertEqual(self.service.account(self.owner['session_token'])['member_id'], self.owner['member_id'])
+
     def test_grant_is_hashed_bound_to_account_and_single_use(self):
         grant = self.service.issue_matrix_login(self.friend['session_token'])
         self.assertNotIn(grant['login_grant'].encode(), self.path.read_bytes())

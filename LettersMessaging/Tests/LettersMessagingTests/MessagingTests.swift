@@ -17,6 +17,14 @@ final class MemoryVault: SessionVault, @unchecked Sendable {
 }
 
 final class MessagingTests: XCTestCase {
+    func testAdmissionTransportRejectsUnsafeEndpointsBeforeNetwork() throws {
+        for value in ["http://example.com", "https://user:secret@example.com", "https://example.com/path",
+                      "https://example.com/?token=secret", "https://example.com/#secret"] {
+            XCTAssertThrowsError(try LetterboxAPI(endpoint: URL(string: value)!))
+        }
+        XCTAssertNoThrow(try LetterboxAPI(endpoint: URL(string: "https://letters.example")!))
+    }
+
     func testProductionEndpointsRequireHTTPSAndNoEmbeddedSecrets() throws {
         for value in ["http://example.com", "https://user:secret@example.com", "https://example.com/?token=x",
                       "https://example.com/#secret", "https://example.com/path"] {

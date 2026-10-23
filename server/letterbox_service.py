@@ -202,6 +202,31 @@ class LetterboxService:
             raise Denied('Messaging connection unavailable')
         return '@letters_' + uuid.UUID(member_id).hex + ':' + self.matrix_server_name
 
+    def account(self, token):
+        """Native restore reads current identity and memberships from the server.
+
+        Return no invitation/session secrets and no global member directory.
+        The local client must discard cached contacts after authorization fails.
+        """
+        with self.db() as c:
+            own = self._auth(c, token)
+            groups = [dict(r) for r in c.execute(
+                'SELECT g.id,g.name,g.admin FROM groups g JOIN group_members gm ON gm.group_id=g.id '
+                'WHERE gm.member=? ORDER BY g.id', (own['id'],))]
+            return {'member_id': own['id'], 'name': own['name'],
+                    'matrix_user_id': self.matrix_user_id(own['id']), 'groups': groups}
+
+    def sign_out(self, token):
+        """Revoke this admission session and its outstanding grants atomically.
+
+        This does not impersonate Matrix logout: the native client must also
+        revoke its SDK device session, retaining retry state on network failure.
+        """
+        with self.db() as c:
+            self._auth(c, token)
+            c.execute('DELETE FROM sessions WHERE hash=?', (digest(token),))
+            return {'signed_out': True}
+
     def matrix_room_audience(self, token, *, contact_id=None, group_id=None):
         """Resolve an authenticated conversation's audience from admission data.
 
@@ -322,6 +347,9 @@ def handler(service):
                 token = auth[7:] if auth.startswith('Bearer ') else None
                 # Dispatch only named operations; caller-provided IDs are re-authorized by each method.
                 routes = {
+                    '/v1/account':lambda:service.account(token),
+                    '/v1/sign-out':lambda:service.sign_out(token),
+                    '/v1/messaging/audience':lambda:service.matrix_room_audience(token, contact_id=data.get('contact_id'), group_id=data.get('group_id')),
                     '/v1/messaging/login-grant':lambda:service.issue_matrix_login(token),
                     '/v1/invitations':lambda:service.issue(token,data.get('group_id'),data.get('ttl',86400)),
                     '/v1/redeem':lambda:service.redeem(data.get('code'),data.get('name'),token),
