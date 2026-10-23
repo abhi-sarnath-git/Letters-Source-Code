@@ -1,32 +1,20 @@
-# Completion and portfolio archive plan
+# Work-in-progress portfolio preservation plan
 
-## Owner's scope — 22 October 2026
+## Current owner decision — 23 October 2026
 
-Finish a usable native SwiftUI portfolio application, validate it with reproducible local infrastructure, then archive the project. Do not substitute a half-finished milestone for the finished application. There is no public launch, App Store/TestFlight release, paid service or production deployment authorized. The budget for external services is zero.
+The owner now accepts archiving Letters **as an unfinished portfolio project**, replacing the earlier requirement to finish the full usable app first. No physical-device testing will be undertaken with the owner. This changes the preservation target, not the implementation status. Do not describe the app as complete or production-ready.
 
-The owner selected invitation-based enrollment instead of SMS, accepted weekly free sideload refresh for optional personal testing, and excluded capabilities unavailable to free Apple signing. Native APNs and the current associated-domain passkey design are outside this scope. Local biometric protection is a separate implementation task, not an already completed account login. Historical phone/passkey design images remain labelled historical previews; they must not become nonfunctional controls in the finished app.
+No paid services, public launch, App Store/TestFlight release or production deployment are authorized. The prior native invitation-based scope remains documented as unfinished. SMS, native push and associated-domain passkey delivery are not supplied.
 
-## What finished means
+## Preparation
 
-- Real invitation enrollment and per-person contacts, with server-enforced direct/group permissions.
-- A normal native account/contact/chat flow without operator-entered Matrix IDs or a developer console.
-- Independently verified encrypted text and media, persistent history, safe failures and clear send states.
-- Device trust/key-change handling, local access protection and documented recovery/revocation behavior.
-- Working timer/clear controls with honest cross-device deletion limits; no claim of erasing recipients' screenshots or exports.
-- Every included screen performs its advertised function. Remaining planned functionality belongs in the roadmap, not inert controls presented as implemented features. Any change to the agreed feature set must be explicit.
-- Reproducible local server/application setup, meaningful tests, native UI verification and security/privacy limitations documented.
-- Reader-friendly source comments explaining decisions, responsibilities, state changes and security boundaries; no secrets or sensitive message content in logs.
+1. Verify the latest source's hosted build and test results; record source/run and evidence limits.
+2. Publish the recruiter-facing README, accurate feature-status table, setup/code guides and existing authentic screenshot gallery.
+3. Freeze a documentation checkpoint and save a verified local backup containing only public repository files, plus checksums and restore instructions. Exclude credentials, account databases, SDK stores, conversations, private keys and operational logs.
+4. **Ask the owner for explicit approval before archiving.** Preparation does not authorize making the repository read-only.
 
-The current Debug encrypted chat is a tested integration milestone, not satisfaction of this list. Voice calling, Alert All, native Letterbox enrollment and other preview surfaces remain incomplete until implemented and tested or explicitly removed from the final scope. Background native push is excluded; an in-app broadcast cannot be presented as dependable emergency notification.
+## Location and effect
 
-## Recruiter-facing delivery
+The public archive will remain [Letters' Source Code](https://github.com/abhi-sarnath-git/Letters-Source-Code). GitHub archival makes it read-only while preserving source, documentation and committed screenshots; it can be unarchived later. A local backup is stored separately on the owner's Mac; its precise path and checksum are recorded locally, not private operational paths published on GitHub.
 
-The repository landing page will lead with what the finished app does, authentic native screenshots, a short architecture map and a link to a reproducible demonstration. A code-reading guide will trace invitation → identity/session → room permission → SDK encryption → delivery/decryption. Setup instructions will state exact runtime requirements, commands, expected results and troubleshooting steps. Test evidence will identify the source version and distinguish synthetic integration tests, simulator checks and any actual physical-device testing.
-
-No unsupported feature, simulated OTP, local preview or isolated SDK test will be described as a fully operational end-user feature.
-
-## Archive location and sequence
-
-The primary archive is the existing public repository [Letters' Source Code](https://github.com/abhi-sarnath-git/Letters-Source-Code). The source, instructions, native screenshots, license information and test evidence will remain publicly readable there. A separate local source/docs backup will also be preserved on the owner's Mac, excluding account databases, sessions, real conversations, credentials and private administration keys.
-
-Only after completion and final verification: freeze an identified final version, verify the backup/checksum and documentation links, then use GitHub's repository archive setting to make it read-only. The repository is not archived now, and no paid or public deployment is a prerequisite for this portfolio archive.
+The repository is not archived at this checkpoint. No app release is created. See [feature status](FEATURE_STATUS.md) for unfinished work and [verification checkpoint](VERIFICATION_CHECKPOINT.md) for actual evidence. The existing 25-screen gallery includes historical previews, explicitly labelled; it is not a claim that all visible features operate across devices.

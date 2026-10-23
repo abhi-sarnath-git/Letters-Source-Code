@@ -1,6 +1,6 @@
 # Letters project checklist
 
-Updated 22 October 2026. Checked items describe completed work, not security certification.
+Historical engineering checklist, retained for traceability. The owner chose work-in-progress preservation on 23 October 2026. See [current feature status](FEATURE_STATUS.md) and [archive plan](ARCHIVE_PLAN.md); unchecked items remain unfinished, not prerequisites silently marked complete. Physical-device testing was declined. Checked items are not security certification.
 
 ## Portfolio foundation
 
