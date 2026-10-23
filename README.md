@@ -68,6 +68,6 @@ Validation covers automated component/integration checks and simulator smoke tes
 
 ## Case study preservation
 
-This repository preserves the source, design work, test evidence and engineering roadmap as a reviewable portfolio case study. It includes a reproducible development setup and records the remaining integrations explicitly. No paid services or public launch are part of this checkpoint. **Archival is pending owner review and approval.** The [preservation plan](Docs/ARCHIVE_PLAN.md) describes the verified source backup and archive procedure.
+This repository preserves the source, design work, test evidence and engineering roadmap as a reviewable portfolio case study. It includes a reproducible development setup and records the remaining integrations explicitly. No paid services or public launch are part of this checkpoint. **Archived with owner approval on 23 October 2026.** The source and screenshots remain available for review; implementation gaps are preserved in the status table. The [preservation plan](Docs/ARCHIVE_PLAN.md) describes the verified source backup and archive procedure.
 
 Matrix SDK third-party licensing is retained under [Docs/ThirdParty](Docs/ThirdParty); a complete transitive dependency notice inventory remains unfinished. No Element application source is copied. This repository presents original product/UI work alongside an established encryption SDK.
